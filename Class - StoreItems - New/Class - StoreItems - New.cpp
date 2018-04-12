@@ -20,8 +20,6 @@ public:
     /*const int& getCode()const { return m_code;  }
     const int& getPrice()const { return m_price;  }
     const int& getQuantity()const { return m_quantity;  }*/
-
-    virtual int calculateStockValue() = 0;
     virtual ~Item(){ };
 };
 
@@ -67,7 +65,7 @@ public:
             std::cout << "Invalid Item code!" << std::endl;
     }
     // (v) total value of the stock
-    virtual int calculateStockValue() override
+    int calculateStockValue()
     {
         int m_totalStock = 0;
         for(const auto &it:m_itemTable)
@@ -82,7 +80,8 @@ int main()
 {
     int number;
     int code;
-    std::unique_ptr<ItemTable> obj = std::make_unique<ItemTable>();
+    std::unique_ptr<Item> obj = std::make_unique<ItemTable>();
+    auto Temp = dynamic_cast<ItemTable*>((obj).get());
 
     std::cout << "Enter total number of Items : ";  std::cin >> number;
 
@@ -92,18 +91,18 @@ int main()
         std::cout << i+1 << ": Enter the Item code = "; std::cin >> code ;
         std::cout << i+1 << ": Enter the Item price = "; std::cin >> price ;
         std::cout << i+1 << ": Enter the Item quantity = "; std::cin >> quantity ;
-        obj->appendItem(code, price, quantity);
+        dynamic_cast<ItemTable*>((obj).get())->appendItem(code, price, quantity);
     }
 
-    std::cout << "Total Value of stock = " << obj->calculateStockValue() << std::endl;
+    std::cout << "Total Value of stock = " << Temp->calculateStockValue() << std::endl;
 
     std::cout << "Enter code of the Item to be displayed: "; std::cin >> code;
-    obj->displayItem(code);
+    Temp->displayItem(code);
 
     std::cout << "Enter code to delete the Item : ";         std::cin >> code;
-    obj->deleteItem(code);
+    Temp->deleteItem(code);
 
-    std::cout << "Total Value of stock = " << obj->calculateStockValue() << std::endl;
+    std::cout << "Total Value of stock = " << Temp->calculateStockValue() << std::endl;
 
     return 0;
 }
