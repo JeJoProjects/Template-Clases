@@ -1,44 +1,65 @@
+di/* VectorExt is a template class which has been publically inherited from
+ * std::vector<> class to extend the printing functionality
+ *
+ * depending upon the enum Mode, operator<< of the class will print the
+ * elements stored inside the container.
+ */
+
 #include <iostream>
 #include <vector>
-#include <string>
-#include <algorithm>
+#include <cstdint>
 
-template<typename T>
-class VectorExt : public std::vector<T>
+// enum for for specifying the printing style at each elements
+enum class Mode { new_line, space };
+// forward declaration
+template<typename Type> class VectorExt;
+
+// convenience type
+template<typename Type>
+using Pair = std::pair<VectorExt<Type>, Mode>;
+
+// forward declaration
+template<typename Type>
+std::ostream& operator<<(std::ostream& out, const Pair<Type> &pairObjs) noexcept;
+
+// class definition
+template<typename Type> class VectorExt final : public std::vector<Type>
 {
+	using std::vector<Type>::vector;
 public:
-    using std::vector<T>::vector;
-
-    const std::string elementString() const
-    {
-        std::string str;    str.clear();
-        for(const auto &it: *this)
-        {
-            str += std::to_string(it);
-            str += " ";
-        }
-        return str;
-    }
-    // extended functionality
-    friend constexpr std::ostream& operator<<
-    (std::ostream& output, const VectorExt<T>& obj)
-    {   return output<<obj.elementString(); }
+	// extended functionality: specilization of operator<< for Type.
+	template<typename Type>
+	friend std::ostream& operator<<<>(std::ostream& out, const Pair<Type> &pairObjs) noexcept;
 };
 
-int main()
+// definition of non-member function
+template<typename Type>
+std::ostream& operator<<(std::ostream& out, const Pair<Type> &pairObjs) noexcept
 {
-    VectorExt<int> obj(10);
-    std::cout<<obj<<std::endl;  // works fine as expected
-
-    VectorExt<int64_t> Obj1 = {1,8,2,3,4,7,5,6,9};
-    std::cout<<Obj1<<std::endl; // works fine as expected
-
-    std::cout<<Obj1.size()<<std::endl; // works fine as expected
-
-    VectorExt<int> vec = {10,2,5,4,7,8,3};
-    std::sort(vec.begin(),vec.end());
-    std::cout<<vec<<std::endl;
-
-    return 0;
+	if (pairObjs.second == Mode::new_line)  // '\n' case
+	{
+		for (const Type& element : pairObjs.first)
+			out << element << '\n';
+	}
+	else if (pairObjs.second == Mode::space)   // '\t' case
+	{
+		for (const Type& element : pairObjs.first)
+			out << element << " ";
+		out << '\n';
+	}
+	return out;
 }
 
+// test code
+int main()
+{
+	VectorExt<int> obj(10);
+	std::cout << std::make_pair(obj, Mode::new_line);
+	std::cout << std::make_pair(obj, Mode::space);
+
+	VectorExt<int64_t> Obj1 = { 1,8,2,3,4,7,5,6,9,10 };
+	std::cout << std::make_pair(Obj1, Mode::space);
+	std::cout << std::make_pair(Obj1, Mode::new_line);
+
+	return 0;
+}
