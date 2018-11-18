@@ -1,4 +1,4 @@
-di/* VectorExt is a template class which has been publically inherited from
+/* VectorExt is a template class which has been publically inherited from
  * std::vector<> class to extend the printing functionality
  *
  * depending upon the enum Mode, operator<< of the class will print the
