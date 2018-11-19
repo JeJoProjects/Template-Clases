@@ -6,7 +6,7 @@
 #include <iostream>
 #include <algorithm>
 
-//
+// @todo: extend with lib implimentation
 template <typename FwdIter>
 inline constexpr void verify_range(
 	const FwdIter &beginIter, const FwdIter &endIter)
