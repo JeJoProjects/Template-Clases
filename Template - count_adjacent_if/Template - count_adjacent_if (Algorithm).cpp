@@ -9,7 +9,8 @@
 #define _EXTRA_BEGIN	namespace extra {
 #define _EXTRA_END	}
 
-_EXTRA_BEGIN // namespace extra
+  _EXTRA_BEGIN // namespace extra
+// @todo: extend with lib implimentation
 template <typename FwdIter>
 inline constexpr void verify_range(
 	const FwdIter &beginIter, const FwdIter &endIter)
