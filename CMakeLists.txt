@@ -5,4 +5,5 @@ project(JeJoTemplateProjects)
 add_subdirectory (TemplateClass_VectorExt)
 add_subdirectory (Template_SFINAE)
 add_subdirectory (Template_Extra_Algorithms)
+# more had to be added in future
 
