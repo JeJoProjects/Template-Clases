@@ -44,10 +44,3 @@ inline constexpr std::size_t count_adjacent_if(const FwdIter _First, const FwdIt
 }
 _EXTRA_END // namespace extra
 
-int main()
-{
-	std::vector<int> vec{ 1,1,2,4,5,5,6,6 };
-	auto BinPred = [](const auto& lhs, const auto& rhs) { return lhs == rhs; };
-	std::cout << extra::count_adjacent_if(vec.begin(), vec.end()) << std::endl;
-	return 0;
-}
