@@ -1,6 +1,6 @@
 /* A simple template-function overloads for basic C++ types
  * using the STD traits std::enable_if, std::is_integral and
- * std::is_floating_point
+ * std::is_floating_point.
  * written for C++11 and later!
  */
 
