@@ -1,29 +1,29 @@
-/* count_adjacent_if
+/* extra::count_adjacent_if: counts all the adjacent pairs of elements in a container* 
+ * which satisfies the binary predicate passed.
  *
+ * @tparam beginIter: forward iterator from which the algorithum should start.
+ * @tparam endIter  : forward iterator until which the algorithum should start run.
+ * @tparam pred     : binary predicate\n
+					    ....std::equal_to<>() by default
+ * @return          : count of adjucent pairs which satisfys the condition.
+ *
+ *  *: the container should be such that the begin and end iterators is defined.
  */
 
-#include <vector>
-#include <iostream>
 #include <algorithm>
+#include <functional>
 
 #define _EXTRA_BEGIN	namespace extra {
 #define _EXTRA_END	}
 
   _EXTRA_BEGIN // namespace extra
+
 // @todo: extend with lib implimentation
-template <typename FwdIter>
-inline constexpr void verify_range(
-	const FwdIter &beginIter, const FwdIter &endIter)
-{
-	_Adl_verify_range(beginIter, endIter);
-}
 
-
-template <typename FwdIter, typename BinaryPred>
+template <typename FwdIter, typename BinaryPred = std::equal_to<void>> // std::greater<void>
 inline constexpr std::size_t count_adjacent_if(
-	FwdIter beginIter, const FwdIter endIter, const BinaryPred &pred)
+	FwdIter beginIter, const FwdIter endIter, BinaryPred pred = {})
 {
-	verify_range(beginIter, endIter);
 	if (beginIter == endIter) return 0;
 	std::size_t count = 0;
 	for (FwdIter nextIter = beginIter; ++nextIter != endIter; beginIter = nextIter)
@@ -36,11 +36,5 @@ inline constexpr std::size_t count_adjacent_if(
 	return count;
 }
 
-//
-template <typename FwdIter>
-inline constexpr std::size_t count_adjacent_if(const FwdIter _First, const FwdIter _Last)
-{	// find first matching successor
-	return count_adjacent_if(_First, _Last, std::equal_to<>());
-}
 _EXTRA_END // namespace extra
 

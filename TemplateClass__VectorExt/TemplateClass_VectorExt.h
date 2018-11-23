@@ -27,7 +27,7 @@ template<typename Type> class VectorExt final : public std::vector<Type>
 public:
 	// extended functionality: specilization of operator<< for template "Type".
 	template<typename Type>
-	friend std::ostream& operator<<<>(std::ostream& out, const Pair<Type> &pairObjs) noexcept;
+	inline friend std::ostream& operator<<<>(std::ostream& out, const Pair<Type> &pairObjs) noexcept;
 };
 
 // definition of non-member function
