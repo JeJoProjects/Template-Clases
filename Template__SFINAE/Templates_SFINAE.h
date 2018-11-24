@@ -1,6 +1,6 @@
 /* A simple template-function overloads for basic C++ types
  * using the STD traits std::enable_if, std::is_integral and
- * std::is_floating_point
+ * std::is_floating_point.
  * written for C++11 and later!
  */
 
@@ -40,14 +40,4 @@ template <typename T>
 enable_for_floating_points<T> Function(const T val)
 { 
 	return 2; 
-}
-
-int main()
-{
-	std::cout << Function(nullptr)	<< " ";
-	std::cout << Function(2)		<< " ";
-	std::cout << Function(2.0f)		<< " ";
-	std::cout << Function((2.0))	<< "\n";
-
-	return  0;
 }
