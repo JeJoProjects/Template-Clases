@@ -2,16 +2,17 @@
  * which satisfies the binary predicate passed.
  *
  * @tparam beginIter: forward iterator from which the algorithum should start.
- * @tparam endIter  : forward iterator until which the algorithum should start run.
+ * @tparam endIter  : forward iterator until which the algorithum should check.
  * @tparam pred     : binary predicate\n
 					    ....std::equal_to<>() by default
  * @return          : count of adjucent pairs which satisfys the condition.
  *
- *  *: the container should be such that the begin and end iterators is defined.
+ *  *the container should be such that the begin and end iterators is defined.
  */
 
+// C++ headers
 #include <algorithm>
-#include <functional>
+#include <functional> // std::equal_to, std::greater<>, etc.
 
 #define _EXTRA_BEGIN	namespace extra {
 #define _EXTRA_END	}
