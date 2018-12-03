@@ -19,7 +19,7 @@ int main()
 	std::cout << std::boolalpha << ::has_duplicates(vec0.cbegin(), vec0.cend()) << '\n';
 
 	std::vector<int> vec1 = { 1, 2, 8, 1, 2, 7, 2 };
-	std::cout << std::boolalpha << ::has_duplicates(vec1.cbegin(), vec1.cend()) << '\n';
+	std::cout << std::boolalpha << ::has_duplicates(vec1.begin(), vec1.end()) << '\n';
 
 	std::vector<std::string> vec2 = { "Je", "Jo", "Ji", "Jy", "Ja", "Jc", "Jq" };
 	std::cout << std::boolalpha << ::has_duplicates(vec2.cbegin(), vec2.cend()) << '\n';
