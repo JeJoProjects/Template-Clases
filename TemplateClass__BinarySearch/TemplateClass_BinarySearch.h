@@ -2,18 +2,16 @@
 #include <limits>            // std::numeric_limits
 #include <algorithm>         // std::is_sorted
 #include <exception>         // std::runtime_error
-#include <initializer_list>  // std::initializer_list<Type>
+#include <initializer_list>  // std::initializer_list<>
 
 
 // variable template for convenice use of std::numeric_limits
-template<typename Type>
-constexpr Type typeMinimum = std::numeric_limits<Type>::min();
-
+template<typename Type> inline constexpr Type typeMinimum = std::numeric_limits<Type>::min();
 
 template<typename Type> class BinarySearch
 {
 private:
-	// internal storage of array
+    // internal storage of array
    std::vector<Type> _vec;
    // index of the searching element
    std::size_t _index;
@@ -45,10 +43,10 @@ private:
    }
 
 public:
-	// initializer_list construcor
-	explicit BinarySearch(const std::initializer_list<Type> a) : _vec(std::move(a)) { make_default_index(); }
-	// getter for index
-	std::size_t getIndex()const   {  return _index; }
+   // initializer_list construcor
+   explicit BinarySearch(const std::initializer_list<Type> a) : _vec(std::move(a)) { make_default_index(); }
+   // getter for index
+   std::size_t getIndex()const   {  return _index; }
    // resetter to set the defualt(min) value
    void make_default_index()      { _index = static_cast<std::size_t>(typeMinimum<Type>); }
 
