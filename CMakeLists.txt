@@ -12,6 +12,7 @@ add_subdirectory (Template__Extra_Algorithms)
 add_subdirectory (TemplateClass__BinarySearch)
 add_subdirectory (TemplateClass__Fractions)
 add_subdirectory (TemplateClass__VectorExt)
+add_subdirectory (TemplateClass__PairExt)
 
 # more had to be added in future
 

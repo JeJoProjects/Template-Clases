@@ -32,4 +32,6 @@
 *.app
 
 Builds/
+builds/
 build/
+Build/
