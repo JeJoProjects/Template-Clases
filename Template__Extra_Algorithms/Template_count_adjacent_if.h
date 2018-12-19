@@ -1,3 +1,4 @@
+#if 0
 import math
 
 # base coordinates 
@@ -134,3 +135,4 @@ for obj in objs:
 
         geoBuilder.normal(nrml3.x(), nrml3.y(), nrml3.z());
         geoBuilder.vertex(a.x(), a.y(), a.z());
+#endif
