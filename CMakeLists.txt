@@ -14,5 +14,5 @@ add_subdirectory (Fractions)
 add_subdirectory (Vector\ Extended)
 add_subdirectory (Pair\ Extended)
 
-# more had to be added in future
+
 
