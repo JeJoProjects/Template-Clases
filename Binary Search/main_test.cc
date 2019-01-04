@@ -2,7 +2,7 @@
 #include <iostream>
 
 // own header
-#include "TemplateClass_BinarySearch.h"
+#include "TemplateClass BinarySearch.h"
 
 // test code
 int main()
@@ -25,13 +25,11 @@ int main()
 
 	std::cout << "\n\n";
 
-#if 0 // @todo: exception for types other than intgegral types
 	// Test - 3: strings
-	BinarySearch<std::string> Arr2{ "a", "b",  "c", "z" };
+	BinarySearch<std::string> Arr2{};
 	Arr2.search("z") ?
-		std::cout << "z" << " found at index: " << Arr2.getIndex() << std::endl :
-		std::cout << "z" << " Not" << std::endl;
-#endif
+		std::cout << "z" << " found at index: " << Arr2.getIndex() << "\n" :
+		std::cout << "z" << " Not\n";
 
 	return 0;
 }

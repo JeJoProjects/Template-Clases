@@ -13,6 +13,3 @@ add_subdirectory (Binary\ Search)
 add_subdirectory (Fractions)
 add_subdirectory (Vector\ Extended)
 add_subdirectory (Pair\ Extended)
-
-
-line
