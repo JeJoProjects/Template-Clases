@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <algorithm>
-/********************** Rational class **********************************/
+
 class Rational
 {
 private:
@@ -87,9 +87,3 @@ void printRational(Rational& obj, const int& A, const int& B)   // lvalue
     //std::cout<<obj.getrealformat()<<std::endl;
 }
 /*****************************************************************************/
-int main()
-{
-    Rational obj;
-    printRational(obj, 4,8888);
-    return 0;
-}
