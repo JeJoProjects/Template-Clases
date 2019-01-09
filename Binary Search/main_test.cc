@@ -26,7 +26,7 @@ int main()
 	std::cout << "\n\n";
 
 	// Test - 3: strings
-	BinarySearch<std::string> Arr2{};
+	BinarySearch<std::string> Arr2{"s", "a"};
 	Arr2.search("z") ?
 		std::cout << "z" << " found at index: " << Arr2.getIndex() << "\n" :
 		std::cout << "z" << " Not\n";
