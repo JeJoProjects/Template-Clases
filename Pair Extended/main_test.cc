@@ -4,7 +4,7 @@
 #include <vector>
 
 // own header
-#include "TemplateClass__PairExt.h"
+#include "PairExtT.h"
 
 using Type = Pair<double, double>;
 

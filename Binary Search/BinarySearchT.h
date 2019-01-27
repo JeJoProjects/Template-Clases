@@ -6,7 +6,7 @@
 #include <type_traits>       // std::is_integral_v, std::is_floating_point_v
 
 
-// variable template for convenice use of std::numeric_limits
+// variable template for convenience use of std::numeric_limits
 template<typename Type> inline constexpr Type typeMinimum = std::numeric_limits<Type>::min();
 
 template<typename Type> class BinarySearch
@@ -18,7 +18,7 @@ private:
 	std::size_t _index = 0;
 
 private:
-	// resetter to set the defualt(min) value
+	// re-setter to set the default(min) value
 	void make_default_index() noexcept
 	{
 		if constexpr (std::is_integral_v<Type> || std::is_floating_point_v<Type>)
@@ -30,7 +30,7 @@ private:
 
 	// helper function to search specific element in the array
 	// and returns: true... if found!
-	// Indition to that: save the position of the element in the array
+	// Indication to that: save the position of the element in the array
 	bool search(std::size_t Start, std::size_t End, const Type& val)
 	{
 		if (End == 0) return false;
@@ -42,7 +42,7 @@ private:
 			if (Start <= End)
 			{
 				const std::size_t mid_index = Start + ((End - Start) / 2);
-				// Find the middle element -> Ckeck ->  split
+				// Find the middle element -> Check ->  split
 				if (_vec[mid_index] == val) { _index = mid_index; return true; }
 				else if (_vec[mid_index] < val)  return search(mid_index + 1, End, val);
 				else                             return search(Start, mid_index - 1, val);
@@ -54,7 +54,7 @@ private:
 	}
 
 public:
-	// initializer_list construcor
+	// initializer_list constructor
 	explicit BinarySearch(const std::initializer_list<Type> a) : _vec(std::move(a)) { make_default_index(); }
 
 	// getter for index

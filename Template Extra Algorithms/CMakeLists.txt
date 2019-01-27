@@ -1,10 +1,15 @@
 cmake_minimum_required(VERSION 2.8.2)
 
-project(Template_Extra_Algorithums)
+project(Algorithums)
 
-add_executable(${PROJECT_NAME} main_test.cc 
-    Template_count_adjacent_if.h
-    Template_get_adjacent_pairs_if.h
-    Template_duplicates.h)
+file(GLOB SOURCES
+  *.h
+  *.cpp
+  *.cc
+)
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 install(TARGETS ${PROJECT_NAME}  RUNTIME DESTINATION bin)

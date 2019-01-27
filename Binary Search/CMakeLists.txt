@@ -1,7 +1,15 @@
 cmake_minimum_required(VERSION 2.8.2)
 
-project(Class\ BinarySearch)
+project(BinarySearchT)
 
-add_executable(${PROJECT_NAME} main_test.cc TemplateClass\ BinarySearch.h)
+file(GLOB SOURCES
+  *.h
+  *.cpp
+  *.cc
+)
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
 
 install(TARGETS ${PROJECT_NAME}  RUNTIME DESTINATION bin)

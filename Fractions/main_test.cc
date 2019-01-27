@@ -4,7 +4,7 @@
 #include <cstdint>
 
 // own header
-#include "TemplateClass_Fractions.h"
+#include "FractionsT.h"
 
 // test code
 int main()

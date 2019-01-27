@@ -1,7 +1,7 @@
 // C++ headers
 #include <iostream>
 // own header
-#include "Templates_SFINAE.h"
+#include "SFINAE.h"
 
 int main()
 {

@@ -2,7 +2,7 @@
 #include <iostream>
 
 // own header
-#include "TemplateClass BinarySearch.h"
+#include "BinarySearchT.h"
 
 // test code
 int main()

@@ -3,8 +3,8 @@
 #include <iostream>
 
 // own header
-#include "Template_count_adjacent_if.h"
-#include "Template_duplicates.h"
+#include "count_adjacent_if.h"
+#include "duplicates.h"
 
 int main()
 {

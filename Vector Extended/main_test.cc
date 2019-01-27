@@ -4,7 +4,7 @@
 #include <cstdint>
 
 // own header
-#include "TemplateClass_VectorExt.h"
+#include "VectorExtT.h"
 
 // test code
 int main()
