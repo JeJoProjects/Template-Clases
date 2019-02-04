@@ -1,72 +1,88 @@
-#include <algorithm>
 #include <cmath>
+#include <algorithm>
+#include <utility>
 
-class Rational final
+class Fraction final
 {
 private:
-	int m_numerator, m_denominator;
+	class DividerHelper final
+	{
+	private:
+		int _numerator, _denominator;
+	private:
+		void simplificate()
+		{
+			int commondivisor = 1;
+			for (int i = 2; i <= std::min(std::abs(_numerator), std::abs(_denominator)); i++)
+				if (_numerator%i == 0 && _denominator%i == 0)
+					commondivisor = i;
+			_numerator /= commondivisor;
+			_denominator /= commondivisor;
+		}
+
+	public:
+		DividerHelper() = default;
+		DividerHelper(const int num, const int den = 1)
+			:_numerator(num), _denominator(den)
+		{}
+
+		// Copy
+		DividerHelper(const DividerHelper& other) = delete;
+		DividerHelper& operator= (DividerHelper const& other) = delete;
+		// Move
+		DividerHelper(DividerHelper &&other) = default;
+		DividerHelper& operator= (DividerHelper &&other) = default;
+		// getter
+		int numerator() const noexcept { return this->_numerator; }
+		int denominator() const noexcept { return this->_denominator; }
+
+		DividerHelper& operator/ (const int divisor)
+		{
+			_denominator *= divisor;
+			simplificate();
+			return *this;
+		}
+
+		DividerHelper& operator/= (const DividerHelper &divisor)
+		{
+			_numerator *= divisor._denominator;
+			_denominator *= divisor._numerator;
+			simplificate();
+			return *this;
+		}
+
+		const double getrealformat()const
+		{
+			return  static_cast<double>(_numerator) /
+				static_cast<double>(_denominator);
+		}
+		friend DividerHelper operator/ (DividerHelper A, DividerHelper B);
+	};
+#if 1
+	DividerHelper operator/ (DividerHelper A, DividerHelper B)
+	{
+		A = std::move(A / B);
+		return A;
+	}
+#endif
 private:
-	inline void simplificate()
-	{
-		int commondivisor = 1;
-		for (int i = 2; i <= std::min(std::abs(m_numerator), std::abs(m_denominator)); i++)
-			if (m_numerator%i == 0 && m_denominator%i == 0)
-				commondivisor = i;
-		m_numerator /= commondivisor;
-		m_denominator /= commondivisor;
-	}
-	/*inline void swap(Rational& other)
-	{
-		std::swap(m_numerator, other.m_denominator);
-		std::swap(m_denominator, other.m_denominator);
-	}*/
+	DividerHelper _fraction;
+
 public:
-	Rational() = default;
-	Rational(const int num, const int den = 1)
-		:m_numerator(num), m_denominator(den)
-	{}
-
-	// Copy
-	Rational(const Rational& other) = default;
-	Rational& operator= (Rational const& other) = default;
-
-	Rational& operator/ (const int divisor) 
+	explicit Fraction(const int num, const int den)
 	{
-		m_denominator *= divisor;
-		simplificate();
-		return *this;
+		DividerHelper _numPart{ num };
+		DividerHelper _denPart{ den };
+		_fraction = std::move(_numPart /= _denPart);
 	}
 
-	Rational& operator/= (const Rational &divisor)
-	{
-		m_numerator *= divisor.m_denominator;
-		m_denominator *= divisor.m_numerator;
-		simplificate();
-		return *this;
-	}
+	// getter
+	int numerator() const noexcept { return this->_fraction.numerator(); }
+	int denominator() const noexcept { return this->_fraction.denominator(); }
 
-	const double getrealformat()const
-	{
-		return  static_cast<double>(m_numerator) /
-			static_cast<double>(m_denominator);
-	}
-
-	friend Rational operator/ (Rational A, Rational const & B);
-	friend void printRational(Rational& obj, const int& A, const int& B);
 };
 
-/************************** Friend functions ********************************/
-Rational operator/ (Rational A, Rational const& B)
+std::ostream& operator<<(std::ostream& out, const Fraction& f) noexcept
 {
-	return std::move(A /= B);
+	return out << f.numerator() << '/' << f.denominator() << " ";
 }
-
-void printRational(Rational& obj, const int& A, const int& B)   // lvalue
-{
-	Rational r1(A), r2(B);
-	obj = r1 / r2;
-	std::cout << obj.m_numerator << '/' << obj.m_denominator << std::endl;
-	std::cout<<obj.getrealformat()<<std::endl;
-}
-
-/*****************************************************************************/

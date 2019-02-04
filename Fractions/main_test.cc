@@ -9,7 +9,7 @@
 // test code
 int main()
 {
-	Rational obj;
-	printRational(obj, 4, 8888);
+	Fraction obj{ 6, 8 };
+	std::cout << obj;
 	return 0;
 }
