@@ -4,8 +4,9 @@ project(Algorithums)
 
 file(GLOB SOURCES
   *.h
-  *.cpp
   *.cc
+  *.hpp
+  *.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
