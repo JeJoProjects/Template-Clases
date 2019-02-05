@@ -4,12 +4,12 @@
 #include <cstdint>
 
 // own header
-#include "FractionsT.h"
+#include "FractionT.h"
 
 // test code
 int main()
 {
 	Fraction obj{ 6, 8 };
-	std::cout << obj;
+	std::cout << obj << " " << obj.getReal() << std::endl;
 	return 0;
 }
