@@ -7,14 +7,14 @@
 #include <iostream>
 #include <type_traits>
 
-//template convenience types
+//template alias: convenience types
 template<typename Type>
 using enable_for_integral 
 	= typename std::enable_if<std::is_integral<Type>::value, int>::type;
 
 template<typename Type>
 using enable_for_floating_points 
-	= typename std::enable_if<std::is_floating_point<Type>::value, int>::type;
+	= typename std::enable_if<std::is_floating_point<Type>::value, float>::type;
 
 // case 1: No specification of argument-> free to choose
 int Function(...) 
@@ -29,7 +29,7 @@ enable_for_integral<T> Function(const T val)
 	return 1; 
 }
 
-// case 3: First prority than the templated version below
+// case 3: First priority than the templates version below
 float Function(const float val) 
 { 
 	return val; // or as follows
