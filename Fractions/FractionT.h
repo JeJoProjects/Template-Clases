@@ -11,10 +11,16 @@ constexpr bool  is_okay_type = std::is_integral<Type>::value
 template<typename Type>
 using enable_if_t = typename std::enable_if< ::is_okay_type<Type> >::type;
 
+
 template<typename Type, typename Enable = void> class Fraction;
 
+
+// forward declaration
 template<typename Type>
-class Fraction<Type, enable_if_t<Type> > final
+std::ostream& operator<<(std::ostream& out, const Fraction<Type>& f) noexcept;
+
+template<typename Type>
+class Fraction<Type, ::enable_if_t<Type> > final
 {
 private:
 	// internal class
@@ -63,16 +69,15 @@ private:
 		}
 
 		friend DividerHelper operator/ (
-			DividerHelper &A, const DividerHelper &B) noexcept
-		{			
-			return std::move(A /= B);
-		}
+			DividerHelper &A, const DividerHelper &B) noexcept;
 	};
 
 private:
 	DividerHelper _fraction;
 
 public:
+	using DividerHelper = Fraction::DividerHelper;
+
 	explicit Fraction(const Type num, const Type den)
 	{
 		DividerHelper _numPart{ num };
@@ -89,9 +94,24 @@ public:
 		return  static_cast<double>(this->numerator()) / 
 			    static_cast<double>(this->denominator());
 	}
-
-	friend std::ostream& operator<<(std::ostream& out, const Fraction& f) noexcept
-	{
-		return out << f.numerator() << '/' << f.denominator() << " ";
-	}
+	// extended functionality: specialization of operator<< for template "Type".
+	template<typename U>
+	friend std::ostream& operator<< <>(std::ostream& out, const Fraction<U>& f) noexcept;
 };
+
+
+template<typename Type>
+using DividerHelper = typename Fraction<Type>::DividerHelper;
+
+template<typename Type>
+DividerHelper<Type> operator/ (DividerHelper<Type> &A, const DividerHelper<Type> &B) noexcept
+{
+	return std::move(A /= B);
+}
+
+// definition of non-member function
+template<typename Type>
+std::ostream& operator<<(std::ostream& out, const Fraction<Type>& f) noexcept
+{
+	return out << f.numerator() << '/' << f.denominator() << " ";
+}
