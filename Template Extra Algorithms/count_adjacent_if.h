@@ -7,15 +7,15 @@
 /* count_adjacent_if: counts all the adjacent pairs of elements in a container*
  * which satisfies the binary predicate passed.
  *
- * @tparam beginIter: forward iterator from which the algorithum should start.
- * @tparam endIter  : forward iterator until which the algorithum should check.
+ * @tparam beginIter: forward iterator from which the algorithm should start.
+ * @tparam endIter  : forward iterator until which the algorithm should check.
  * @tparam pred     : binary predicate\n
 						....std::equal_to<>() by default
- * @return          : count of adjucent pairs which satisfys the condition.
+ * @return          : count of adjacent pairs which satisfy the condition.
  *
  *  *the container should be such that the begin and end iterators is defined.
  *
- * @todo            : may be it can be extended like lib implimentation
+ * @todo            : may be it can be extended like lib implementation
  */
 
 template <typename FwdIter, typename BinaryPred = std::equal_to<>> // std::equal_to by default
@@ -38,11 +38,11 @@ inline constexpr std::size_t count_adjacent_if(
 /* count_adjacent_if2: counts all the adjacent pairs of elements in a container*
  * which satisfies the binary predicate passed.
  *
- * @tparam beginIter: forward iterator from which the algorithum should start.
- * @tparam endIter  : forward iterator until which the algorithum should check.
+ * @tparam beginIter: forward iterator from which the algorithm should start.
+ * @tparam endIter  : forward iterator until which the algorithm should check.
  * @tparam pred     : binary predicate\n
 						....std::equal_to<>() by default
- * @return          : count of adjucent pairs which satisfys the condition.
+ * @return          : count of adjacent pairs which satisfy the condition.
  *
  *  @todo           : it has a severe bug which needed to be fixed.
  *  *the container should be such that the begin and end iterators is defined.
