@@ -1,0 +1,37 @@
+import math
+
+vec = rf.Vector3(10, 0, 0);
+vec = vec.normalize()
+theta = math.radians(0)
+r1Vec = rf.Vector3(math.cos(theta) + (vec.x() * vec.x() * (1 - math.cos(theta))), (vec.x() * vec.y() * (1 - math.cos(theta))) - (vec.z() * math.sin(theta)), (vec.x() * vec.z() * (1 - math.cos(theta))) + (vec.y() * math.sin(theta)))
+
+r2Vec = rf.Vector3((vec.x() * vec.y() * (1 - math.cos(theta))) + (vec.z() * math.sin(theta)), math.cos(theta) + (vec.y() * vec.y() * (1 - math.cos(theta))), (vec.y() * vec.z() * (1 - math.cos(theta))) - (vec.x() * math.sin(theta)))
+
+r3Vec = rf.Vector3((vec.z() * vec.x() * (1 - math.cos(theta))) - (vec.y() * math.sin(theta)), (vec.z() * vec.y() * (1 - math.cos(theta))) + (vec.x() * math.sin(theta)), math.cos(theta) + (vec.z() * vec.z() * (1 - math.cos(theta))))
+
+
+    # https://math.stackexchange.com/q/2628960/
+    mat = obj.getValues("mat")
+    
+    OP = rf.Vector3(center - rf.Vector3(mat[3], mat[7], mat[11]))
+    mat[3] += center.x()
+    mat[7] += center.y()
+    mat[11] += center.z()
+    mat = rf.Matrix4x4(mat)
+
+
+    # translate to center
+    mat = obj.getValues("mat")
+    mat[3] += center.x()
+    mat[7] += center.y()
+    mat[11] += center.z()
+    mat = rf.Matrix4x4(mat)
+    print(mat)
+    # rotate
+    rotMat = getRotationMatrix(axis, angle);
+    matAfterRot = (rotMat*mat).getValues();
+    # translate back
+    matAfterRot[3] -= center.x()
+    matAfterRot[7] -= center.y()
+    matAfterRot[11] -= center.z()
+    obj.setValues("mat", matAfterRot)

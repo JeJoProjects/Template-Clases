@@ -1,0 +1,380 @@
+# Cylinder 
+#________________________________________________________
+
+import math
+
+# base coordinates 
+def coodinateAt(r, theta, Ox = 0, Oy = 0, Oz = 0):
+   x = Ox + (r*math.cos(math.radians(theta))); 
+   y = Oy + (r*math.sin(math.radians(theta)));
+   return rf.Vector3(x, y, Oz);
+
+# custom range
+def my_range(start, end, step):
+    if start <= end:
+        # increasing order
+        while start < end:
+            yield start;
+            start += step;
+
+    # decreasing order
+    while start >= end:
+        yield start;
+        start -= step;
+
+# get calling form
+form = rf.form.appContext.getCallingForm()
+# get objects
+objs = form.getObjs()
+# process all objects
+for obj in objs:
+  if obj == None:
+    continue
+  if obj.getClassName() != "YAMSBodyProto":
+    continue
+  with obj.openBuilder() as geoBuilder:
+    # Material
+    geoBuilder.mtlAmbientColor(0, 0, 1)
+    geoBuilder.mtlDiffuseColor(0, 0, 1)
+    geoBuilder.mtlSpecularColor(.8, .8, .8)
+    geoBuilder.mtlAlpha(0.5)
+    geoBuilder.mtlShininess(64)
+    geoBuilder.material("blue")
+    
+    # GState
+    geoBuilder.gsFrontMaterial("blue")
+    geoBuilder.gsFront(True)
+    geoBuilder.gsLighting(True)
+    geoBuilder.gState("blue")
+    
+    # Material
+    geoBuilder.mtlAmbientColor(.2, .2, .2)
+    geoBuilder.mtlDiffuseColor(.8, .8, .8)
+    geoBuilder.mtlSpecularColor(.8, .8, .8)
+    geoBuilder.mtlAlpha(1.0)
+    geoBuilder.mtlShininess(64)
+    geoBuilder.material("white")
+    
+    # Texture
+    geoBuilder.texFilePath("StrikeOut.png")
+    geoBuilder.texMagFilter(rf.yams.ofm.FilterMode.Linear)
+    geoBuilder.texMinFilter(rf.yams.ofm.FilterMode.Nearest)
+    geoBuilder.texture("StrikeOut")
+    
+    # GState
+    geoBuilder.gsFrontMaterial("white")
+    geoBuilder.gsTexture("StrikeOut")
+    geoBuilder.gsFront(True)
+    geoBuilder.gsLighting(True)
+    geoBuilder.gState("white-textured")
+    
+    # Parameters of geometry
+    bO = rf.Vector3(0, 5, 0); # bO - origin/ center of the cone base
+    a = rf.Vector3(0, 5, 3);  # a - position of apex
+    d = (a-bO).normalize();   # d - normalized vector from base to apex
+    r = 2;                    # r - radius of directrix
+    n = 360;                  # n - no. of total line of faces
+    triangles = 30;           # triangles - no. triangles for constructing the faces
+    triangles = 7 if triangles < 7 else triangles;
+
+    # Geometry: normals, no colors, texture coordinates
+    geoBuilder.primType(rf.yams.ofm.PrimType.Triangles);
+
+    # list of angles
+    theta_list = [];
+    # geoBuilder.normal(d.x(), d.y(), d.z());
+    for theta in my_range(0, n, n/triangles):
+        if theta != n: 
+            theta_list.append(theta);
+    for index in range(2):     # repeat the first three again
+        theta_list.append(theta_list[index]);
+
+ 
+    geoBuilder.useGState("blue");
+    # Geometry
+    for index in range(len(theta_list[:-2])):
+        theta0 = theta_list[index];
+        theta1 = theta_list[index+1];
+
+    # Base
+        geoBuilder.vertexType(True, False, True);
+        vtx1 = coodinateAt(r, theta1, bO.x(), bO.y(), bO.z());
+        vtx2 = coodinateAt(r, theta0, bO.x(), bO.y(), bO.z());
+        crs = (vtx1 - bO).cross(vtx2-vtx1); # from origin
+        nrml = crs.normalize();
+                
+        geoBuilder.normal(nrml.x(), nrml.y(), nrml.z());
+        geoBuilder.vertex(bO.x(), bO.y(), bO.z());
+        geoBuilder.vertex(vtx1.x(), vtx1.y(), vtx1.z());
+        geoBuilder.vertex(vtx2.x(), vtx2.y(), vtx2.z());
+
+    # Top
+        geoBuilder.vertexType(True, False, True);
+        vtx1 = coodinateAt(r, theta0, a.x(), a.y(), a.z());
+        vtx2 = coodinateAt(r, theta1, a.x(), a.y(), a.z());
+        crs = (vtx1 - a).cross(vtx2-vtx1); # from origin
+        nrml = crs.normalize();
+                
+        geoBuilder.normal(nrml.x(), nrml.y(), nrml.z());
+        geoBuilder.vertex(a.x(), a.y(), a.z());
+        geoBuilder.vertex(vtx1.x(), vtx1.y(), vtx1.z());
+        geoBuilder.vertex(vtx2.x(), vtx2.y(), vtx2.z());
+
+   # Surface
+        geoBuilder.vertexType(True, False, False);
+
+        vtx1_t =  coodinateAt(r, theta0, a.x(), a.y(), a.z());
+        vtx2_b =  coodinateAt(r, theta0, bO.x(), bO.y(), bO.z());
+        vtx3_t =  coodinateAt(r, theta1, a.x(), a.y(), a.z());
+        vtx4_b =  coodinateAt(r, theta1, bO.x(), bO.y(), bO.z());
+
+   # normals
+        nrml1 = (vtx1_t - a).normalize();   # 1t - 2b - 3t
+        nrml2 = (vtx2_b - bO).normalize();
+        nrml3 = (vtx3_t - a).normalize();
+        nrml4 = nrml2;                      # 2b - 4b - 3t
+        nrml5 = (vtx4_b - bO).normalize(); 
+        nrml6 = nrml3;
+
+        geoBuilder.normal(nrml1.x(), nrml1.y(), nrml1.z());
+        geoBuilder.vertex(vtx1_t.x(), vtx1_t.y(), vtx1_t.z());
+
+        geoBuilder.normal(nrml2.x(), nrml2.y(), nrml2.z());
+        geoBuilder.vertex(vtx2_b.x(), vtx2_b.y(), vtx2_b.z());
+
+        geoBuilder.normal(nrml3.x(), nrml3.y(), nrml3.z());
+        geoBuilder.vertex(vtx3_t.x(), vtx3_t.y(), vtx3_t.z());
+
+        geoBuilder.normal(nrml4.x(), nrml4.y(), nrml4.z());
+        geoBuilder.vertex(vtx2_b.x(), vtx2_b.y(), vtx2_b.z());
+
+        geoBuilder.normal(nrml5.x(), nrml5.y(), nrml5.z());
+        geoBuilder.vertex(vtx4_b.x(), vtx4_b.y(), vtx4_b.z());
+
+        geoBuilder.normal(nrml6.x(), nrml6.y(), nrml6.z());
+        geoBuilder.vertex(vtx3_t.x(), vtx3_t.y(), vtx3_t.z());
+        
+        
+             
+
+# Cylinder with 3 normals
+#_____________________________________________________________________________________
+
+import math
+
+# base coordinates 
+def baseCoodinateAt(r, theta, Ox = 0, Oy = 0, Oz = 0):
+   x = Ox + (r*math.cos(math.radians(theta))); 
+   y = Oy + (r*math.sin(math.radians(theta)));
+   return rf.Vector3(x, y, Oz);
+
+# custom range
+def my_range(start, end, step):
+    if start <= end:
+        # increasing order
+        while start < end:
+            yield start;
+            start += step;
+
+    # decreasing order
+    while start >= end:
+        yield start;
+        start -= step;
+
+# reverse the list
+def reverse(data_list):
+    length = len(data_list)
+    new_list = [None]*length
+
+    for item in data_list:
+        length = length - 1
+        new_list[length] = item
+    return new_list
+
+# get the unit-normal
+def getNormal(a, b, c):
+    crs = (b - a).cross(c - a); # from origin
+    return crs.normalize();
+
+
+# get calling form
+form = rf.form.appContext.getCallingForm()
+# get objects
+objs = form.getObjs()
+# process all objects
+for obj in objs:
+  if obj == None:
+    continue
+  if obj.getClassName() != "YAMSBodyProto":
+    continue
+  with obj.openBuilder() as geoBuilder:
+    # Material
+    geoBuilder.mtlAmbientColor(0, 0, 1)
+    geoBuilder.mtlDiffuseColor(0, 0, 1)
+    geoBuilder.mtlSpecularColor(.8, .8, .8)
+    geoBuilder.mtlAlpha(0.5)
+    geoBuilder.mtlShininess(64)
+    geoBuilder.material("blue")
+    
+    # GState
+    geoBuilder.gsFrontMaterial("blue")
+    geoBuilder.gsFront(True)
+    geoBuilder.gsLighting(True)
+    geoBuilder.gState("blue")
+    
+    # Material
+    geoBuilder.mtlAmbientColor(.2, .2, .2)
+    geoBuilder.mtlDiffuseColor(.8, .8, .8)
+    geoBuilder.mtlSpecularColor(.8, .8, .8)
+    geoBuilder.mtlAlpha(1.0)
+    geoBuilder.mtlShininess(64)
+    geoBuilder.material("white")
+    
+    # Texture
+    geoBuilder.texFilePath("StrikeOut.png")
+    geoBuilder.texMagFilter(rf.yams.ofm.FilterMode.Linear)
+    geoBuilder.texMinFilter(rf.yams.ofm.FilterMode.Nearest)
+    geoBuilder.texture("StrikeOut")
+    
+    # GState
+    geoBuilder.gsFrontMaterial("white")
+    geoBuilder.gsTexture("StrikeOut")
+    geoBuilder.gsFront(True)
+    geoBuilder.gsLighting(True)
+    geoBuilder.gState("white-textured")
+    
+    # Parameters of geometry
+    bO = rf.Vector3(0, 0, 0); # bO - origin/ center of the cone base
+    a = rf.Vector3(0, 0, 2);  # a - position of apex
+    d = (a-bO).normalize();   # d - normalized vector from base to apex
+    r = 2;                    # r - radius of directrix
+    n = 360;                  # n - no. of total line of faces
+    triangles = 20;           # triangles - no. triangles for constructing the faces
+    triangles = 6 if triangles < 6 else triangles;
+
+    # Geometry: normals, no colors, texture coordinates
+    geoBuilder.primType(rf.yams.ofm.PrimType.Triangles);
+
+    # list of angles
+    theta_list = [];
+    # geoBuilder.normal(d.x(), d.y(), d.z());
+    for theta in my_range(0, n, n/triangles):
+        if theta != n: 
+            theta_list.append(theta);
+    for index in range(4):     # repeat the first three again
+        theta_list.append(theta_list[index]);
+
+    theta_list_reversed = reverse(theta_list);
+    geoBuilder.useGState("blue");
+    for index in range(len(theta_list_reversed[:-4])):
+        theta0 = theta_list_reversed[index];
+        theta1 = theta_list_reversed[index+1];
+        theta2 = theta_list_reversed[index+2];
+        theta3 = theta_list_reversed[index+3];
+        #print(theta0, " ", theta1, " ", theta2);
+ 
+    geoBuilder.useGState("blue");
+    # Geometry
+    for index in range(len(theta_list[:-3])):
+        theta0 = theta_list[index];
+        theta1 = theta_list[index+1];
+        theta2 = theta_list[index+2];
+        theta3 = theta_list[index+3];
+        #print(theta0, " ", theta1, " ", theta2);
+
+    # Base
+        geoBuilder.vertexType(True, False, True);
+        vtx1 = baseCoodinateAt(r, theta1, bO.x(), bO.y(), bO.z());
+        vtx2 = baseCoodinateAt(r, theta0, bO.x(), bO.y(), bO.z());
+        crs = (vtx1 - bO).cross(vtx2-vtx1); # from origin
+        nrml = crs.normalize();
+
+        #print(nrml);
+                
+        geoBuilder.normal(nrml.x(), nrml.y(), nrml.z());
+        geoBuilder.vertex(bO.x(), bO.y(), bO.z());
+        geoBuilder.vertex(vtx1.x(), vtx1.y(), vtx1.z());
+        geoBuilder.vertex(vtx2.x(), vtx2.y(), vtx2.z());
+
+    # Top
+        geoBuilder.vertexType(True, False, True);
+        vtx1 = baseCoodinateAt(r, theta0, a.x(), a.y(), a.z());
+        vtx2 = baseCoodinateAt(r, theta1, a.x(), a.y(), a.z());
+        crs = (vtx1 - a).cross(vtx2-vtx1); # from origin
+        nrml = crs.normalize();
+
+        #print(nrml);
+                
+        geoBuilder.normal(nrml.x(), nrml.y(), nrml.z());
+        geoBuilder.vertex(a.x(), a.y(), a.z());
+        geoBuilder.vertex(vtx1.x(), vtx1.y(), vtx1.z());
+        geoBuilder.vertex(vtx2.x(), vtx2.y(), vtx2.z());
+
+   # Surface
+        geoBuilder.vertexType(True, False, False);
+
+        vtx1_t =  baseCoodinateAt(r, theta0, a.x(), a.y(), a.z());
+        vtx2_b =  baseCoodinateAt(r, theta0, bO.x(), bO.y(), bO.z());
+        vtx3_t =  baseCoodinateAt(r, theta1, a.x(), a.y(), a.z());
+        vtx4_b =  baseCoodinateAt(r, theta1, bO.x(), bO.y(), bO.z());
+        vtx5_t =  baseCoodinateAt(r, theta2, a.x(), a.y(), a.z());
+        vtx6_b =  baseCoodinateAt(r, theta2, bO.x(), bO.y(), bO.z());
+        vtx7_t =  baseCoodinateAt(r, theta3, a.x(), a.y(), a.z());
+        vtx8_t =  baseCoodinateAt(r, theta3, bO.x(), bO.y(), bO.z());
+
+   # normals
+        #nrml10 = getNormal(vtx1_t, vtx2_b, vtx3_t); # 1 - 2 - 3
+        #nrml20 = getNormal(vtx2_b, vtx3_t, vtx1_t);
+        nrml30 = getNormal(vtx3_t, vtx1_t, vtx2_b);
+
+        #nrml21 = getNormal(vtx2_b, vtx4_b, vtx3_t); # 2 - 4 - 3
+        nrml40 = getNormal(vtx4_b, vtx3_t, vtx2_b);
+        nrml31 = getNormal(vtx3_t, vtx2_b, vtx4_b);
+
+        nrml32 = getNormal(vtx3_t, vtx4_b, vtx5_t); # 3 - 4 -5
+        nrml41 = getNormal(vtx4_b, vtx5_t, vtx3_t);
+        nrml50 = getNormal(vtx5_t, vtx3_t, vtx4_b);
+
+        nrml51 = getNormal(vtx5_t, vtx4_b, vtx6_b); # 4 - 6 - 5
+        nrml42 = getNormal(vtx4_b, vtx6_b, vtx5_t);
+        nrml60 = getNormal(vtx6_b, vtx5_t, vtx4_b);
+
+        nrml52 = getNormal(vtx5_t, vtx6_b, vtx7_t); # 5 - 6 - 7
+        nrml61 = getNormal(vtx6_b, vtx7_t, vtx5_t);
+        #nrml70 = getNormal(vtx7_t, vtx5_t, vtx6_b);
+
+        # not needed nrml52 = getNormal(vtx5_t, vtx6_b, vtx7_t); # 6 - 8 - 7
+        nrml62 = getNormal(vtx6_b, vtx8_t, vtx7_t);
+        # not needed nrml70 = getNormal(vtx7_t, vtx5_t, vtx6_b);
+
+
+        nrml1 = (nrml30 + nrml31 + nrml32).normalize();  # 3 - 4 - 5
+        nrml2 = (nrml40 + nrml41 + nrml42).normalize();
+        nrml3 = (nrml50 + nrml51 + nrml52).normalize();
+        #print(nrml1, " | ", nrml2, " | ", nrml3);
+
+        geoBuilder.normal(nrml1.x(), nrml1.y(), nrml1.z());
+        geoBuilder.vertex(vtx3_t.x(), vtx3_t.y(), vtx3_t.z());
+
+        geoBuilder.normal(nrml2.x(), nrml2.y(), nrml2.z());
+        geoBuilder.vertex(vtx4_b.x(), vtx4_b.y(), vtx4_b.z());
+
+        geoBuilder.normal(nrml3.x(), nrml3.y(), nrml3.z());
+        geoBuilder.vertex(vtx5_t.x(), vtx5_t.y(), vtx5_t.z());
+
+        nrml4 = nrml2;
+        nrml5 = (nrml60 + nrml61 + nrml62).normalize();
+        nrml6 = nrml3;
+
+        geoBuilder.normal(nrml4.x(), nrml4.y(), nrml4.z());
+        geoBuilder.vertex(vtx4_b.x(), vtx4_b.y(), vtx4_b.z());
+
+        geoBuilder.normal(nrml5.x(), nrml5.y(), nrml5.z());
+        geoBuilder.vertex(vtx6_b.x(), vtx6_b.y(), vtx6_b.z());
+
+        geoBuilder.normal(nrml6.x(), nrml6.y(), nrml6.z());
+        geoBuilder.vertex(vtx5_t.x(), vtx5_t.y(), vtx5_t.z());
+        
+        
+        
+
