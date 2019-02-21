@@ -3,11 +3,12 @@
 #include <utility>
 #include <type_traits>
 
-// convenience type(s)
+// convenience type
 template<typename Type>
 constexpr bool  is_okay_type = std::is_integral<Type>::value
 				/*|| std::is_floating_point<Type>::value*/;
 
+// convenience type
 template<typename Type>
 using enable_if_t = typename std::enable_if< ::is_okay_type<Type> >::type;
 
@@ -62,9 +63,9 @@ private:
 
 		DividerHelper& operator/= (const DividerHelper &divisor) noexcept
 		{
-			_numerator *= divisor._denominator;
-			_denominator *= divisor._numerator;
-			simplificate();
+			this->_numerator *= divisor._denominator;
+			this->_denominator *= divisor._numerator;
+			this->simplificate();
 			return *this;
 		}
 
@@ -82,7 +83,7 @@ public:
 	{
 		DividerHelper _numPart{ num };
 		const DividerHelper _denPart{ den };
-		this->_fraction = std::move(_numPart /= _denPart);
+		this->_fraction = std::move(_numPart / _denPart);
 	}
 
 	// getter
@@ -99,10 +100,10 @@ public:
 	friend std::ostream& operator<< <>(std::ostream& out, const Fraction<U>& f) noexcept;
 };
 
+// convenience type
+template<typename Type> using DividerHelper = typename Fraction<Type>::DividerHelper;
 
-template<typename Type>
-using DividerHelper = typename Fraction<Type>::DividerHelper;
-
+// definition of non-member function
 template<typename Type>
 DividerHelper<Type> operator/ (DividerHelper<Type> &A, const DividerHelper<Type> &B) noexcept
 {
