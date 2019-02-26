@@ -108,13 +108,14 @@ template<typename Container, typename Predicate = std::less<>>
 auto min_element_range_of(const Container &container,
 	std::size_t startIdx,
 	std::size_t endIdx,
-	const Predicate pred = {}) -> std::remove_reference_t<decltype(*(container.begin()))>
-                             // or simply:  // typename Container::value_type
+	const Predicate pred = {})
+	-> std::remove_reference_t<decltype(*(container.begin()))>
+	         // or simply: // typename Container::value_type
 {
-	return *std::min_element(std::next(container.begin(), startIdx),
+	return *std::min_element(
+		std::next(container.begin(), startIdx),
 		std::next(container.begin(), ++endIdx), pred);
 }
-
 
 JEJO_END
 
