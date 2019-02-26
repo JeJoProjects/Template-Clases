@@ -1,13 +1,8 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.0)
 
-project(JeJoTemplateProjects)
+# seperate projects
+add_subdirectory (SFINAE)
+add_subdirectory (Algorithms)
+add_subdirectory (JeJoProjects)
 
-add_subdirectory (Class\ Shape)
-
-add_subdirectory (Template\ SFINAE)
-add_subdirectory (Template\ Extra\ Algorithms)
-
-add_subdirectory (Binary\ Search)
-add_subdirectory (Fractions)
-add_subdirectory (Vector\ Extended)
-add_subdirectory (Pair\ Extended)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT "JeJoTemplateProjects")
