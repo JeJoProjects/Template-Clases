@@ -95,7 +95,7 @@ int main()
 	shapes[0] = new Rectangle<float>(10.0f, 15.0f);
 	shapes[1] = new Circle<float>(5.0f);
 	shapes[2] = new Triangle<float>(3, 4, 5.2);
-	shapes[3] = new Triangle<float>(4, 2.0125);
+	shapes[3] = new Triangle<float>(4, 2.0125f);
 
 	for (int n = 0; n < 4; n++)
 		std::cout << "Shape[" << n << "] P="

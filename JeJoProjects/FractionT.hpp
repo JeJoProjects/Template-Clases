@@ -92,7 +92,7 @@ public:
 
 	double getReal() const noexcept
 	{
-		return  static_cast<double>(this->numerator()) / 
+		return  static_cast<double>(this->numerator()) /
 			    static_cast<double>(this->denominator());
 	}
 	// extended functionality: specialization of operator<< for template "Type".

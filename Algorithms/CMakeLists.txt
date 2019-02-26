@@ -1,12 +1,11 @@
-cmake_minimum_required(VERSION 2.8.2)
-
-project(VectorExtendedT)
+project("Algorithums")
 
 file(GLOB SOURCES
-  *.h
-  *.cpp
-  *.cc
-)
+   *.h
+   *.hpp
+   *.cc
+   *.cpp
+ )
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 

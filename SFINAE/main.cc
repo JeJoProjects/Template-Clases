@@ -2,7 +2,7 @@
 #include <iostream>
 
 // own header
-#include "SFINAE.h"
+#include "SFINAE.hpp"
 
 int main()
 {
