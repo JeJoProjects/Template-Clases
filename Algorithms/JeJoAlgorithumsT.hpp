@@ -22,6 +22,7 @@
 #include <iterator>   // std::next
 #include <cstddef>    // std::size_t
 #include <numeric>    // std::inner_product
+#include <algorithm>  // std::min_element
 #include <map>        // std::map<>
 
 JEJO_BEGIN
@@ -40,14 +41,15 @@ JEJO_BEGIN
  * @todo            : may be it can be extended like lib implementation
  */
 
-template <typename FwdIter, typename BinaryPred = std::equal_to<>>
-inline constexpr std::size_t count_adjacent_if(
-	FwdIter beginIter, const FwdIter endIter, const BinaryPred pred = {}) noexcept
+template <typename Iterator, typename BinaryPred = std::equal_to<>>
+constexpr std::size_t count_adjacent_if(
+	      Iterator beginIter,
+	const Iterator endIter,
+	const BinaryPred pred = {}) noexcept
 {
 	if (beginIter == endIter) return 0;
 	std::size_t count = 0;
-	for (FwdIter nextIter = beginIter;
-		++nextIter != endIter;
+	for (Iterator nextIter = beginIter; ++nextIter != endIter;
 		beginIter = nextIter)
 	{
 		if (pred(*beginIter, *nextIter))	++count;
@@ -67,9 +69,9 @@ inline constexpr std::size_t count_adjacent_if(
  *  @todo           : it has a severe bug which needed to be fixed.
  *  *the container should be such that the begin and end iterators is defined.
  */
-template <typename FwdIter, typename BinaryPred = std::equal_to<>>
-inline constexpr std::size_t count_adjacent_if2(
-	FwdIter beginIter, const FwdIter endIter, BinaryPred pred = {}) noexcept
+template <typename Iterator, typename BinaryPred = std::equal_to<>>
+constexpr std::size_t count_adjacent_if2(
+	Iterator beginIter, const Iterator endIter, const BinaryPred pred = {})
 {
 	const auto n = std::distance(beginIter, endIter);
 	if (n < 2) return std::size_t{ 0 };
@@ -84,12 +86,11 @@ inline constexpr std::size_t count_adjacent_if2(
  * @return  : true.... duplicates exists
  *            false... if not
  */
-
-template <typename FwdIter>
-inline constexpr bool has_duplicates(FwdIter beginIter, const FwdIter endIter)
+template <typename Iterator>
+inline constexpr bool has_duplicates(Iterator beginIter, const Iterator endIter)
 {
 	if (beginIter == endIter) return false; // edge case
-	using Type = typename std::decay<decltype(*beginIter)>::type;
+	using Type = typename std::remove_reference_t<decltype(*beginIter)>;
 	std::map<Type, std::size_t> countMap;
 	for (; beginIter != endIter; ++beginIter)
 	{
@@ -98,6 +99,22 @@ inline constexpr bool has_duplicates(FwdIter beginIter, const FwdIter endIter)
 	}
 	return false;
 }
+
+/* min_element_range_of: @todo: description
+ *
+ * @return  : minimum element in the container
+ */
+template<typename Container, typename Predicate = std::less<>>
+auto min_element_range_of(const Container &container,
+	std::size_t startIdx,
+	std::size_t endIdx,
+	const Predicate pred = {}) -> std::remove_reference_t<decltype(*(container.begin()))>
+                             // or simply:  // typename Container::value_type
+{
+	return *std::min_element(std::next(container.begin(), startIdx),
+		std::next(container.begin(), ++endIdx), pred);
+}
+
 
 JEJO_END
 
