@@ -24,6 +24,10 @@
 #include <numeric>    // std::inner_product
 #include <algorithm>  // std::min_element
 #include <map>        // std::map<>
+#include <memory>     // smart pointers
+#include <utility>    // std::declval
+#include <functional> // std::cref
+#include <array>
 
 JEJO_BEGIN
 
@@ -115,6 +119,27 @@ auto min_element_range_of(const Container &container,
 	return *std::min_element(
 		std::next(container.begin(), startIdx),
 		std::next(container.begin(), ++endIdx), pred);
+}
+
+/* To avoid copying the smart pointers, during the initialization of a
+ * std::initializer_list without using raw pointers.
+ * StackOverflow: https://stackoverflow.com/questions/54868996/54869137
+ *
+ * Since crefRange(const-ref T...) accepts temporaries, there is a chance of
+ * building an array of dangling (const)std::reference_wrapper's,
+ * it is essential to delete the possible template instance explicitly.
+ */
+
+template <class ...T> auto crefPointers(const T&&...) = delete;
+
+template <class ...T> auto crefPointers(const T&... args)
+{
+	// type alias for type of the first element in the args
+	using FirstType = std::tuple_element_t<0, std::tuple<T...>>;
+	// type alias for (const)std::reference_wrapper to the 'FirstType'
+	using CRefFirst = decltype(std::cref(std::declval<FirstType&>()));
+	// making an array of type = 'CRefFirst'
+	return std::array<CRefFirst, sizeof...(T)>{ { std::cref(args)... } };
 }
 
 JEJO_END
