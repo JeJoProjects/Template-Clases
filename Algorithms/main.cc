@@ -7,7 +7,7 @@
 
 int main()
 {
-#if 1 // Test 1: count_adjacent_if
+#if 0 // Test 1: count_adjacent_if
 	std::cout << "Test 1: count_adjacent_if...\n";
 	std::vector<int> vec{ 1,1,2,4,5,5,6,6 };
 	const auto BinPred = [](const auto& lhs, const auto& rhs) { return lhs + rhs == 3 ; };
@@ -15,7 +15,7 @@ int main()
 	// std::cout << ::count_adjacent_if2(vec.cbegin(), vec.cend(), BinPred) <<'\n'; // error
 #endif
 
-#if 1 // Test 2: has_duplicates
+#if 0 // Test 2: has_duplicates
 	std::cout << "Test 2: has_duplicates...\n";
 	std::vector<char> vec0{ 'c','a','i','o','p','a' };
 	std::cout << std::boolalpha << JeJo::has_duplicates(vec0.cbegin(), vec0.cend()) << '\n';
