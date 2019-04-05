@@ -1,13 +1,15 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.2)
 
-project(JeJoTemplateProjects)
+project(BinarySearchT)
 
-add_subdirectory (Class\ Shape)
+file(GLOB SOURCES
+  *.h
+  *.cpp
+  *.cc
+)
 
-add_subdirectory (Template\ SFINAE)
-add_subdirectory (Template\ Extra\ Algorithms)
+add_executable(${PROJECT_NAME} ${SOURCES})
 
-add_subdirectory (Binary\ Search)
-add_subdirectory (Fractions)
-add_subdirectory (Vector\ Extended)
-add_subdirectory (Pair\ Extended)
+target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17)
+
+install(TARGETS ${PROJECT_NAME}  RUNTIME DESTINATION bin)
