@@ -1,7 +1,7 @@
 /******************************************************************************
  * Implementation of Fraction<>, which provides a template class, to show
  * the decimals in a fractional form of it.
- * Currently the class is capable of handling integer parameters(inputs).
+ * Currently the class is capable of handling integer (template)parameters.
  *
  * @Authur :  JeJo
  * @Date   :  June - 2018
@@ -19,22 +19,23 @@
 #include <cmath>
 #include <algorithm>
 #include <utility>     // std::move
-#include <type_traits> // is_integral<>
+#include <type_traits> // std::is_integral<>, std::is_same<>, std::enable_if<>
 
-// convenience type
+// convenience type(s)
 template<typename Type>
 inline constexpr bool  is_okay_type =
-!std::is_same<bool, Type>::value && !std::is_same<wchar_t, Type>::value
-&& std::is_same<char, Type>::value
-/*&& !std::is_integral<char8_t, Type>::value */ // valid since C++20
-/*|| std::is_floating_point<Type>::value*/;
-// @todo: should be also available for floats ?
+     !std::is_same<bool, Type>::value && !std::is_same<wchar_t, Type>::value
+  && !std::is_same<char, Type>::value && !std::is_integral<Type>::value;
+   /*&& !std::is_same<char8_t, Type>::value */ // valid since C++20
+   /*|| std::is_floating_point<Type>::value*/
+   // @todo: should be also available for floats ?
 
-// convenience type
 template<typename Type>
 using enable_if_t = typename std::enable_if<is_okay_type<Type>>::type;
 
-
+/* conditional instantiation of the template class, depending on the template
+ * argument.
+ */
 template<typename Type, typename Enable = void> class Fraction;
 
 

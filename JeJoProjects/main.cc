@@ -13,10 +13,10 @@
 
 int main()
 {
-#if 0 // Test : FractionT<>
+#if 1 // Test : FractionT<>
 	for (int i = 0; i <= 80; ++i)
 	{
-		Fraction<int> obj(i, 8);
+		Fraction<int> obj{ i, 8 };
 		std::cout << obj << " " << obj.getReal() << std::endl;
 	}
 
