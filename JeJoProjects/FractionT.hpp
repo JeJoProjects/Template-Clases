@@ -16,16 +16,18 @@
 #define JEJO_END   }
 
 // C++ headers
-#include <cmath>
-#include <algorithm>
+#include <cmath>       // std::abs
+#include <algorithm>   // std::min
 #include <utility>     // std::move
 #include <type_traits> // std::is_integral<>, std::is_same<>, std::enable_if<>
+
+JEJO_BEGIN
 
 // convenience type(s)
 template<typename Type>
 inline constexpr bool  is_okay_type =
      !std::is_same<bool, Type>::value && !std::is_same<wchar_t, Type>::value
-  && !std::is_same<char, Type>::value && !std::is_integral<Type>::value;
+  && !std::is_same<char, Type>::value &&  std::is_integral<Type>::value;
    /*&& !std::is_same<char8_t, Type>::value */ // valid since C++20
    /*|| std::is_floating_point<Type>::value*/
    // @todo: should be also available for floats ?
@@ -40,8 +42,8 @@ template<typename Type, typename Enable = void> class Fraction;
 
 
 // forward declaration
-template<typename Type>
-std::ostream& operator<<(std::ostream& out, const Fraction<Type>& f) noexcept;
+template<typename U>
+std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept;
 
 template<typename Type>
 class Fraction<Type, enable_if_t<Type> > final
@@ -60,17 +62,16 @@ private:
 			const Type n = std::min(
 				std::abs(_numerator), std::abs(_denominator));
 			for (int i = 2; i <=n ; i++)
-				if (_numerator%i == 0 && _denominator%i == 0)
+				if (_numerator % i == 0 && _denominator % i == 0)
 					commondivisor = i;
 			_numerator /= commondivisor;
 			_denominator /= commondivisor;
 		}
 
 	public:
-		// constructors
-		DividerHelper() = default;
+		// constructor(s)
 		DividerHelper(const Type num, const Type den = 1)
-			:_numerator(num), _denominator(den)
+			:_numerator{ num }, _denominator{ den }
 		{}
 
 		// Copy : disabled
@@ -94,20 +95,39 @@ private:
 		}
 
 		friend DividerHelper operator/ (
-			DividerHelper &A, const DividerHelper &B) noexcept;
+			DividerHelper &A, const DividerHelper &B) noexcept
+		{
+			return std::move(A /= B); // @todo: should be brought outside.
+		}
 	};
 
 private:
-	DividerHelper _fraction;
+	// DividerHelper doesn't required a default constructor any more!
+	DividerHelper _fraction{ 1 }; // default initialization
 
 public:
+	// public type alias for friend functions.
 	using DividerHelper = Fraction::DividerHelper;
 
+	// constructor(s)
 	explicit Fraction(const Type num, const Type den)
 	{
 		DividerHelper _numPart{ num };
 		const DividerHelper _denPart{ den };
 		this->_fraction = std::move(_numPart / _denPart);
+	}
+
+	// Copy : disabled
+	Fraction(const Fraction &other) = delete;
+	Fraction& operator=(const Fraction &other) = delete;
+
+	// Move : enabled
+	Fraction(const Fraction &&other) : _fraction{ std::move(other._fraction) }
+	{}
+	Fraction& operator=(const Fraction &&other)
+	{
+		this->_fraction = std::move(other._fraction);
+		return *this;
 	}
 
 	// getter
@@ -119,29 +139,36 @@ public:
 		return  static_cast<double>(this->numerator()) /
 			static_cast<double>(this->denominator());
 	}
-	// extended functionality: specialization of operator<< for template "Type".
+	// extended functionality: specialization of operator<< for template "U".
 	template<typename U> friend std::ostream& operator<< <>(
 		std::ostream& out, const Fraction<U>& f) noexcept;
 };
 
+// definition of non-member function(s)
+template<typename U>
+std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept
+{
+	return f.numerator() && f.denominator() && f.denominator() != 1 ?
+			out << f.numerator() << '/' << f.denominator():
+		f.numerator() && f.denominator() == 1 ? out << f.numerator() :
+		f.numerator() == f.denominator() ? out << "1" :
+		f.numerator() && !f.denominator() ? out << "Infinity" : out << "0";
+}
+
+#if 0 // @todo : how to write the definition of non-member out side the class.
 // convenience type
 template<typename Type>
 using DividerHelper = typename Fraction<Type>::DividerHelper;
 
-// definition of non-member function
 template<typename Type>
 DividerHelper<Type> operator/ (
 	DividerHelper<Type> &A, const DividerHelper<Type> &B) noexcept
 {
 	return std::move(A /= B);
 }
+#endif
 
-// definition of non-member function
-template<typename Type>
-std::ostream& operator<<(std::ostream& out, const Fraction<Type>& f) noexcept
-{
-	return out << f.numerator() << '/' << f.denominator() << " ";
-}
+JEJO_END
 
 #endif // JEJO_FRACTION_T_H
 

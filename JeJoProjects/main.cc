@@ -16,13 +16,13 @@ int main()
 #if 1 // Test : FractionT<>
 	for (int i = 0; i <= 80; ++i)
 	{
-		Fraction<int> obj{ i, 8 };
-		std::cout << obj << " " << obj.getReal() << std::endl;
+		JeJo::Fraction<int> obj{ i, 10 };
+		std::cout << obj << "   " << obj.getReal() << std::endl;
 	}
 
 	// @todo: implementation for float and doubles
-	// Fraction<float> obj1(3.5f, 1.0f);
-	// std::cout << obj1 << " " << obj1.getReal() << std::endl;
+	// JeJo::Fraction<float> obj1{3.5f, 1.0f};
+	// std::cout << obj1 << "   " << obj1.getReal() << std::endl;
 #endif
 
 #if 0 // Test : VectorExt<>
@@ -50,7 +50,7 @@ int main()
 	for (const auto& pair : vec2)  std::cout << pair;
 #endif
 
-#if 1 // Test : BinarySearchT<>
+#if 0 // Test : BinarySearchT<>
 	// Test - 1: integers
 	JeJo::BinarySearch<int> Arr0{ 1,  2,  3, 4, 5, 8 };
 
