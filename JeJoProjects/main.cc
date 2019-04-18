@@ -1,6 +1,7 @@
 // C++ headers
 #include <vector>
 #include <numeric>
+#include <iomanip>
 
 // Library headers
 #include "BinarySearchT.hpp"
@@ -13,11 +14,11 @@
 
 int main()
 {
-#if 1 // Test : FractionT<>
-	for (int i = 0; i <= 80; ++i)
+#if 0 // Test : FractionT<>
+	for (int i = -10; i <= 15; ++i)
 	{
 		JeJo::Fraction<int> obj{ i, 10 };
-		std::cout << obj << "   " << obj.getReal() << std::endl;
+		std::cout << obj << std::setw(8) << obj.getReal() << std::endl;
 	}
 
 	// @todo: implementation for float and doubles
@@ -42,11 +43,15 @@ int main()
 	sg.emit();
 #endif
 
-#if 0 // Test : PairExtT<> // @todo: bug needs to be fixed before start using
-	std::vector<std::pair<double, double>> vec2(5, std::make_pair(0.1, 1.1));
+#if 1 // Test : PairExtT<>
+	std::pair<int, int> pp{};
+	std::vector<JeJo::PairExt<double, double>> vec2(5, JeJo::make_pair(0.1, 1.1));
+
 	for (const auto& pair : vec2)  std::cout << pair;
-	auto p = std::make_pair(0.1, 1.1);
+
+	const JeJo::PairExt<double, double> p{ JeJo::make_pair(0.1, 1.1) };
 	std::iota(vec2.begin(), vec2.end(), p); std::cout << "\n";
+
 	for (const auto& pair : vec2)  std::cout << pair;
 #endif
 
