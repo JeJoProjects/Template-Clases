@@ -9,8 +9,8 @@
  * @todo: explanation and limitations of the class
  *****************************************************************************/
 
-#ifndef JEJO_BINARY_SEARCH_T_H
-#define JEJO_BINARY_SEARCH_T_H
+#ifndef JEJO_BINARY_SEARCH_T_HPP
+#define JEJO_BINARY_SEARCH_T_HPP
 
  // macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
@@ -112,7 +112,7 @@ public:
 
 JEJO_END
 
-#endif // JEJO_BINARY_SEARCH_T_H
+#endif // JEJO_BINARY_SEARCH_T_HPP
 
 /*****************************************************************************/
 

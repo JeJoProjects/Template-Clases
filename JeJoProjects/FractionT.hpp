@@ -8,8 +8,8 @@
  * @license: free to use and distribute(no further support as well)
  *****************************************************************************/
 
-#ifndef JEJO_FRACTION_T_H
-#define JEJO_FRACTION_T_H
+#ifndef JEJO_FRACTION_T_HPP
+#define JEJO_FRACTION_T_HPP
 
  // macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
@@ -25,15 +25,19 @@ JEJO_BEGIN
 
 // convenience type(s)
 template<typename Type>
-inline constexpr bool  is_okay_type =
-     !std::is_same<bool, Type>::value && !std::is_same<wchar_t, Type>::value
-  && !std::is_same<char, Type>::value &&  std::is_integral<Type>::value;
-   /*&& !std::is_same<char8_t, Type>::value */ // valid since C++20
+using is_okay_type = typename std::conjunction<
+    std::is_integral<Type>,
+    std::negation<std::is_same<Type, bool>>,
+    std::negation<std::is_same<Type, char>>,
+    std::negation<std::is_same<Type, char16_t>>,
+    std::negation<std::is_same<Type, char32_t>>,
+    std::negation<std::is_same<Type, wchar_t>> >;
+  /*std::negation<std::is_same<char8_t, Type>> */ // valid since C++20
    /*|| std::is_floating_point<Type>::value*/
    // @todo: should be also available for floats ?
 
 template<typename Type>
-using enable_if_t = typename std::enable_if<is_okay_type<Type>>::type;
+using is_allowed_t = std::enable_if_t<is_okay_type<Type>::value>;
 
 /* conditional instantiation of the template class, depending on the template
  * argument.
@@ -46,7 +50,7 @@ template<typename U>
 std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept;
 
 template<typename Type>
-class Fraction<Type, enable_if_t<Type> > final
+class Fraction<Type, is_allowed_t<Type> > final
 {
 private:
 	// internal class
@@ -170,6 +174,6 @@ DividerHelper<Type> operator/ (
 
 JEJO_END
 
-#endif // JEJO_FRACTION_T_H
+#endif // JEJO_FRACTION_T_HPP
 
 /*****************************************************************************/

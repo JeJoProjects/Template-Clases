@@ -1,5 +1,12 @@
 /******************************************************************************
-
+ * Implementation of BinarySearch<>, which provides a template container class
+ * to binary search the element in the internally stored array.
+ *
+ * @Authur :  JeJo
+ * @Date   :  June - 2018
+ * @license: free to use and distribute(no further support as well)
+ *
+ * @todo: explanation and limitations of the class
 ******************************************************************************/
 
 #ifndef JEJO_PAIR_EXTENDED_T_HPP

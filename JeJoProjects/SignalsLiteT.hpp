@@ -1,5 +1,5 @@
-#ifndef SIGNALS_LITE_T_H
-#define SIGNALS_LITE_T_H
+#ifndef SIGNALS_LITE_T_HPP
+#define SIGNALS_LITE_T_HPP
 
 #include <cstddef>		// std::size_t, std::nullptr_t
 #include <utility>		// std::move(), std::forward<>()
@@ -641,4 +641,4 @@ private:
 
 };
 
-#endif // SIGNALS_LITE_T_H
+#endif // SIGNALS_LITE_T_HPP

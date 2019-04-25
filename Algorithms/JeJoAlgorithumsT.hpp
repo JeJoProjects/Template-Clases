@@ -10,8 +10,8 @@
  * Individual explanations are provided, prior to each algorithm definitions.
  *****************************************************************************/
 
-#ifndef JEJO_ALGORITHMS_T_H
-#define JEJO_ALGORITHMS_T_H
+#ifndef JEJO_ALGORITHMS_T_HPP
+#define JEJO_ALGORITHMS_T_HPP
 
 // macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
@@ -144,6 +144,6 @@ template <class ...T> auto crefPointers(const T&... args)
 
 JEJO_END
 
-#endif // JEJO_ALGORITHMS_T_H
+#endif // JEJO_ALGORITHMS_T_HPP
 
 /*****************************************************************************/

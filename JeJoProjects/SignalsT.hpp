@@ -1,5 +1,5 @@
-#ifndef SignalS_T_H
-#define SignalS_T_H
+#ifndef SignalS_T_HPP
+#define SignalS_T_HPP
 
 #include <cstddef>		// std::size_t, std::nullptr_t
 #include <utility>		// std::move(), std::forward<>()
@@ -1009,7 +1009,7 @@ private:
 
 };
 
-#endif // SignalS_T_H
+#endif // SignalS_T_HPP
 
 #if 0
 // Construct an object of type _Ty, passing std::shared_ptr<_Ty> and
