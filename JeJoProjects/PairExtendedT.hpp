@@ -1,12 +1,16 @@
 /******************************************************************************
- * Implementation of BinarySearch<>, which provides a template container class
- * to binary search the element in the internally stored array.
+ * Implementation of PairExt<>, which provides a template class for a pair type
+ * which accepts two arbitrary types as template parameters.
  *
  * @Authur :  JeJo
  * @Date   :  June - 2018
  * @license: free to use and distribute(no further support as well)
  *
- * @todo: explanation and limitations of the class
+ * The non-member functions are restricted to be not to instantiate for the
+ * types other than the allowed_arithmetic types.
+ * Traits 'is_allowed_arithmetic<>' will ensure this to happens.
+ *
+ * @todo: conditional instantiation of the template class.
 ******************************************************************************/
 
 #ifndef JEJO_PAIR_EXTENDED_T_HPP
@@ -42,7 +46,7 @@ using is_allowed_arithmetic_t = std::enable_if_t<
 
 /* forward declaration(s) and conditional instantiation of the template class,
  * depending on the template argument.
- * @todo: should be enabled only for integral types!
+ * @todo: should be enabled only for arithmetic types!
  */
 template<typename T, typename U> struct PairExt;
 
