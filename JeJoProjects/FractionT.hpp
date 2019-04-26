@@ -44,7 +44,6 @@ template<typename Type> using is_allowed_integral_t
  */
 template<typename Type, typename Enable = void> class Fraction;
 
-
 // forward declaration
 template<typename U>
 std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept;

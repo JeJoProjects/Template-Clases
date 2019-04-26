@@ -21,7 +21,7 @@
 
 JEJO_BEGIN
 
-// traits for possible template types(s)
+// traits for possible(arithmetic) template types(s)
 template<typename Type>
 using is_allowed_arithmetic = std::conjunction<
    std::is_arithmetic<Type>,
@@ -32,30 +32,35 @@ using is_allowed_arithmetic = std::conjunction<
    std::negation<std::is_same<Type, wchar_t>> >;
  /*std::negation<std::is_same<char8_t, Type>> */ // valid since C++20
 
-template<typename T, typename U>
+template<typename T, typename U, typename ReType = void>
 using is_allowed_arithmetic_t = std::enable_if_t<
 	    std::conjunction_v<
             JeJo::is_allowed_arithmetic<T>,
 	        JeJo::is_allowed_arithmetic<U>
-		>
+		>, ReType
    >;
 
 /* forward declaration(s) and conditional instantiation of the template class,
  * depending on the template argument.
+ * @todo: should be enabled only for integral types!
  */
 template<typename T, typename U> struct PairExt;
+
 template<typename T, typename U>
-std::ostream& operator<<(std::ostream &out, const PairExt<T, U>  &p) noexcept;
+auto operator<<(std::ostream &out, const PairExt<T, U>  &p) noexcept ->
+                            JeJo::is_allowed_arithmetic_t<T, U, std::ostream&>;
 
 // PairExt<> definition
-template<typename T, typename U>
-struct PairExt final
+template<typename T, typename U> struct PairExt final
 {
+	// public members
 	T first{};
 	U second{};
 
-	PairExt(const T &fir, const U &sec) noexcept : first{fir}, second{sec} {}
-
+	// constructor(s)
+	constexpr explicit PairExt(const T &fir, const U &sec) noexcept
+		: first{fir}, second{sec}
+	{}
 	// Copy : enabled
 	PairExt(const PairExt &other) noexcept
 		: first{ other.first },
@@ -67,13 +72,11 @@ struct PairExt final
 		this->second = other.second;
 		return *this;
 	}
-
 	// Move : enabled
 	constexpr PairExt(PairExt &&other) noexcept
 		: first{std::move(other.first)},
 		second{std::move(other.second)}
 	{}
-
 	PairExt& operator=(PairExt &&other) noexcept
 	{
 		this->first = std::move(other.first);
@@ -82,13 +85,11 @@ struct PairExt final
 	}
 
 	// overloaded operator(s)  of the class
-	// @todo: should be enabled only for integral types!
 	PairExt& operator++() noexcept
 	{
 		this->first++; this->second++;
 		return *this;
 	}
-
 	// post-increment, return unmodified copy by value
 	PairExt operator++(int) noexcept
 	{
@@ -97,20 +98,25 @@ struct PairExt final
 		return copy;
 	}
 
-	// non-member function(s)
-	friend std::ostream& operator<< <>(
-		std::ostream & out, const PairExt  &p) noexcept;
+	// non-member function(s): enabled only for the allowed_arithmetic types
+	friend auto operator<< <>(
+		std::ostream & out, const PairExt  &p) noexcept ->
+		                    JeJo::is_allowed_arithmetic_t<T, U, std::ostream&>;
 };
 
 template<typename T, typename U>
-std::ostream& operator<<(std::ostream & out, const PairExt<T, U>  &p) noexcept
+auto operator<<(std::ostream & out, const PairExt<T, U>  &p) noexcept ->
+                           JeJo::is_allowed_arithmetic_t<T, U, std::ostream&>
 {
 	return out << p.first << " " << p.second << std::endl;
 }
 
-// make_pair() to construct a PairExt<> : similar to std::make_pair
+/* make_pair() to construct a PairExt<> : similar to std::make_pair
+ * This has been enabled only for the allowed_arithmetic types.
+ */
 template<typename T, typename U>
-PairExt<T, U> make_pair(T first, U second) noexcept
+auto make_pair(T first, U second) noexcept ->
+                            JeJo::is_allowed_arithmetic_t<T, U, PairExt<T, U>>
 {
 	return PairExt<T, U>{first, second};
 }
