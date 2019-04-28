@@ -27,13 +27,13 @@ int main()
 #endif
 
 #if 0 // Test : VectorExt<>
-	VectorExt<int> obj(10, 1);
-	std::cout << std::make_pair(obj, Mode::new_line);
-	std::cout << std::make_pair(obj, Mode::space);
+	JeJo::VectorExt<int> obj(10, 1);
+	std::cout << std::make_pair(obj, JeJo::Mode::new_line);
+	std::cout << std::make_pair(obj, JeJo::Mode::space);
 
-	VectorExt<int64_t> Obj1 = { 1,8,2,3,4,7,5,6,9,10 };
-	std::cout << std::make_pair(Obj1, Mode::space);
-	std::cout << std::make_pair(Obj1, Mode::new_line);
+	JeJo::VectorExt<int64_t> Obj1 = { 1,8,2,3,4,7,5,6,9,10 };
+	std::cout << std::make_pair(Obj1, JeJo::Mode::space);
+	std::cout << std::make_pair(Obj1, JeJo::Mode::new_line);
 #endif
 
 #if 0 // Test : SignalsT<>

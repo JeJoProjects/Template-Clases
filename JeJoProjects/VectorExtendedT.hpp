@@ -1,12 +1,27 @@
-/* VectorExt is a template class which has been public-ally inherited from
+/******************************************************************************
+ * VectorExt is a template class which has been public-ally inherited from
  * std::vector<> class to extend the printing functionality
  *
  * depending upon the enum Mode, operator<< of the class will print the
  * elements stored inside the container.
- */
+ *
+ * @Authur :  JeJo
+ * @Date   :  May - 2018
+ * @license: free to use and distribute(no further support as well)
+ *****************************************************************************/
 
+#ifndef JEJO_VECTOR_EXTENDED_T_HPP
+#define JEJO_VECTOR_EXTENDED_T_HPP
+
+// macros for name-spacing
+#define JEJO_BEGIN namespace JeJo {
+#define JEJO_END   }
+
+// C++ headers
 #include <iostream>
 #include <vector>
+
+JEJO_BEGIN
 
 // enum for for specifying the printing style at each elements
 enum class Mode { new_line, space };
@@ -20,7 +35,8 @@ using ModePair = std::pair<VectorExt<Type>, Mode>;
 
 // forward declaration
 template<typename Type>
-std::ostream& operator<<(std::ostream& out, const ModePair<Type> &pairObjs) noexcept;
+std::ostream& operator<<(
+	std::ostream& out, const ModePair<Type> &pairObjs) noexcept;
 
 // class definition
 template<typename Type> class VectorExt : public std::vector<Type>
@@ -50,3 +66,9 @@ std::ostream& operator<<(std::ostream& out, const ModePair<Type> &pairObjs) noex
 	}
 	return out;
 }
+
+JEJO_END
+
+#endif // JEJO_VECTOR_EXTENDED_T_HPP
+
+/*****************************************************************************/

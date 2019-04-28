@@ -11,7 +11,7 @@
 #ifndef JEJO_FRACTION_T_HPP
 #define JEJO_FRACTION_T_HPP
 
- // macros for name-spacing
+// macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
 #define JEJO_END   }
 
