@@ -3,7 +3,7 @@
  * which accepts two arbitrary types as template parameters.
  *
  * @Authur :  JeJo
- * @Date   :  June - 2018
+ * @Date   :  May - 2018
  * @license: free to use and distribute(no further support as well)
  *
  * The non-member functions are restricted to be not to instantiate for the
@@ -16,7 +16,7 @@
 #ifndef JEJO_PAIR_EXTENDED_T_HPP
 #define JEJO_PAIR_EXTENDED_T_HPP
 
- // macros for name-spacing
+// macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
 #define JEJO_END }
 
