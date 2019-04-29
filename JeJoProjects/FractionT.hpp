@@ -23,9 +23,9 @@
 
 JEJO_BEGIN
 
-// convenience type(s)
+// traits for possible template types(s)
 template<typename Type>
-using is_okay_type = typename std::conjunction<
+using is_allowed_integral = std::conjunction<
     std::is_integral<Type>,
     std::negation<std::is_same<Type, bool>>,
     std::negation<std::is_same<Type, char>>,
@@ -36,21 +36,20 @@ using is_okay_type = typename std::conjunction<
    /*|| std::is_floating_point<Type>::value*/
    // @todo: should be also available for floats ?
 
-template<typename Type>
-using is_allowed_t = std::enable_if_t<is_okay_type<Type>::value>;
+template<typename Type> using is_allowed_integral_t
+   = std::enable_if_t<JeJo::is_allowed_integral<Type>::value>;
 
 /* conditional instantiation of the template class, depending on the template
  * argument.
  */
 template<typename Type, typename Enable = void> class Fraction;
 
-
 // forward declaration
 template<typename U>
 std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept;
 
 template<typename Type>
-class Fraction<Type, is_allowed_t<Type> > final
+class Fraction<Type, JeJo::is_allowed_integral_t<Type> > final
 {
 private:
 	// internal class
