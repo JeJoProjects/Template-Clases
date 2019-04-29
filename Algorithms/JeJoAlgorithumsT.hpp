@@ -130,9 +130,8 @@ auto min_element_range_of(const Container &container,
  * it is essential to delete the possible template instance explicitly.
  */
 
-template <class ...T> auto crefPointers(const T&&...) = delete;
-
-template <class ...T> auto crefPointers(const T&... args)
+template <typename ...T> auto crefPointers(const T&&...) = delete;
+template <typename ...T> auto crefPointers(const T&... args)
 {
 	// type alias for type of the first element in the args
 	using FirstType = std::tuple_element_t<0, std::tuple<T...>>;

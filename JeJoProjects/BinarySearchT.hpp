@@ -25,6 +25,9 @@
 #include <type_traits>       // std::is_arithmetic_v<>
 #include <cstddef>           // std::size_t
 
+// own JeJo-lib headers
+#include "JeJoAlgorithumsT.hpp"
+
 JEJO_BEGIN
 
 // variable template for convenience use of std::numeric_limits<>
@@ -38,7 +41,7 @@ private:
 	// internal storage of array
 	std::vector<Type> _vec;
 	// index of the searching element (all other non-integer cases)
-	std::size_t _index = 0;
+	std::size_t _index{ 0 };
 
 private:
 	// re-setter to set the default(min) value
@@ -91,9 +94,13 @@ private:
 
 public:
 	// initializer_list constructor
-	explicit BinarySearch(const std::initializer_list<Type> a)
-		: _vec{ std::move(a) }
+	explicit constexpr BinarySearch(const std::initializer_list<Type> a)
+		: (!JeJo::has_duplicates(a.begin(), a.end())
+		? _vec{ a }
+		: static_assert(false, " the array has duplicates -> No BS possible!\n"))
 	{
+		std::cout <<
+			std::boolalpha << has_duplicates(_vec.cbegin(), _vec.cend());
 		this->make_default_index();
 	}
 
