@@ -16,9 +16,11 @@
 #define JEJO_END   }
 
 // C++ headers
+#include <iostream>
 #include <cmath>       // std::abs
 #include <algorithm>   // std::min
 #include <utility>     // std::move
+#include <iomanip>     // std::setw
 #include <type_traits> // std::is_integral<>, std::is_same<>, std::enable_if<>
 
 JEJO_BEGIN
@@ -49,7 +51,7 @@ template<typename U>
 std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept;
 
 template<typename Type>
-class Fraction<Type, JeJo::is_allowed_integral_t<Type> > final
+class Fraction<Type, JeJo::is_allowed_integral_t<Type>> final
 {
 private:
 	// internal class
@@ -59,12 +61,13 @@ private:
 		Type _numerator, _denominator;
 
 	private:
+		// internal function(s)
 		void simplificate() noexcept
 		{
 			Type commondivisor = 1;
 			const Type n = std::min(
 				std::abs(_numerator), std::abs(_denominator));
-			for (int i = 2; i <=n ; i++)
+			for (Type i = 2; i <=n ; i++)
 				if (_numerator % i == 0 && _denominator % i == 0)
 					commondivisor = i;
 			_numerator /= commondivisor;
@@ -73,22 +76,25 @@ private:
 
 	public:
 		// constructor(s)
-		DividerHelper(const Type num, const Type den = 1)
+		constexpr explicit DividerHelper(
+			const Type num, const Type den = 1) noexcept
 			:_numerator{ num }, _denominator{ den }
 		{}
 
-		// Copy : disabled
+		// copy : disabled
 		DividerHelper(const DividerHelper& other) = delete;
 		DividerHelper& operator= (DividerHelper const& other) = delete;
 
-		// Move : enabled
-		DividerHelper(DividerHelper &&other) = default;
-		DividerHelper& operator= (DividerHelper &&other) = default;
+		// move : enabled
+		constexpr DividerHelper(DividerHelper &&other) noexcept = default;
+		constexpr DividerHelper& operator= (
+			DividerHelper &&other) noexcept = default;
 
-		// getter
-		Type numerator() const noexcept { return this->_numerator; }
-		Type denominator() const noexcept { return this->_denominator; }
+		// getter(s)
+		constexpr Type numerator() const noexcept { return this->_numerator; }
+		constexpr Type denominator()const noexcept{return this->_denominator;}
 
+		// overloaded operator/=
 		DividerHelper& operator/= (const DividerHelper &divisor) noexcept
 		{
 			this->_numerator *= divisor._denominator;
@@ -97,10 +103,11 @@ private:
 			return *this;
 		}
 
+		// non-member function(s)
 		friend DividerHelper operator/ (
-			DividerHelper &A, const DividerHelper &B) noexcept
+			DividerHelper& A, const DividerHelper& B) noexcept
 		{
-			return std::move(A /= B); // @todo: should be brought outside.
+			return std::move(A /= B);
 		}
 	};
 
@@ -113,35 +120,41 @@ public:
 	using DividerHelper = Fraction::DividerHelper;
 
 	// constructor(s)
-	explicit Fraction(const Type num, const Type den)
+	constexpr explicit Fraction(const Type num, const Type den) noexcept
 	{
 		DividerHelper _numPart{ num };
 		const DividerHelper _denPart{ den };
 		this->_fraction = std::move(_numPart / _denPart);
 	}
 
-	// Copy : disabled
+	// copy : disabled
 	Fraction(const Fraction &other) = delete;
 	Fraction& operator=(const Fraction &other) = delete;
 
-	// Move : enabled
-	Fraction(const Fraction &&other) : _fraction{ std::move(other._fraction) }
+	// move : enabled
+	constexpr Fraction(const Fraction &&other) noexcept
+		: _fraction{ std::move(other._fraction) }
 	{}
-	Fraction& operator=(const Fraction &&other)
+	constexpr Fraction& operator= (const Fraction &&other) noexcept
 	{
 		this->_fraction = std::move(other._fraction);
 		return *this;
 	}
 
-	// getter
-	Type numerator() const noexcept { return this->_fraction.numerator(); }
-	Type denominator() const noexcept { return this->_fraction.denominator(); }
+	// getter(s)
+	constexpr Type numerator() const noexcept {
+		return this->_fraction.numerator();
+	}
+	constexpr Type denominator() const noexcept {
+		return this->_fraction.denominator();
+	}
 
-	double getReal() const noexcept
+	constexpr double getReal() const noexcept
 	{
 		return  static_cast<double>(this->numerator()) /
 			static_cast<double>(this->denominator());
 	}
+
 	// extended functionality: specialization of operator<< for template "U".
 	template<typename U> friend std::ostream& operator<< <>(
 		std::ostream& out, const Fraction<U>& f) noexcept;
@@ -157,19 +170,6 @@ std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept
 		f.numerator() == f.denominator() ? out << "1" :
 		f.numerator() && !f.denominator() ? out << "Infinity" : out << "0";
 }
-
-#if 0 // @todo : how to write the definition of non-member out side the class.
-// convenience type
-template<typename Type>
-using DividerHelper = typename Fraction<Type>::DividerHelper;
-
-template<typename Type>
-DividerHelper<Type> operator/ (
-	DividerHelper<Type> &A, const DividerHelper<Type> &B) noexcept
-{
-	return std::move(A /= B);
-}
-#endif
 
 JEJO_END
 

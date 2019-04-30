@@ -14,7 +14,7 @@
 
 int main()
 {
-#if 1 // Test : BinarySearchT<>
+#if 0 // Test : BinarySearchT<>
 	// Test - 1: integers
 	JeJo::BinarySearch<int> Arr0{ 1,  2,  3, 4, 5, 8 };
 
@@ -32,16 +32,15 @@ int main()
 		std::cout << i + 0.04f << " found at index: " << Arr1.getIndex() << '\n' : std::cout << i + 0.04f << " Not\n";
 
 	std::cout << "\n\n";
-#if 0
+
 	// Test - 3: strings
 	JeJo::BinarySearch<std::string> Arr2{ "s", "a" };
 	Arr2.search("z") ?
 		std::cout << "z" << " found at index: " << Arr2.getIndex() << "\n" :
 		std::cout << "z" << " Not\n";
 #endif
-#endif
 
-#if 0 // Test : FractionT<>
+#if 1 // Test : FractionT<>
 	for (int i = -10; i <= 15; ++i)
 	{
 		JeJo::Fraction<int> obj{ i, 10 };
