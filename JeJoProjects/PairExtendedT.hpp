@@ -10,7 +10,8 @@
  * types other than the allowed_arithmetic types.
  * Traits 'is_allowed_arithmetic<>' will ensure this to happens.
  *
- * @todo: conditional instantiation of the template class.
+ * Do not wonder:
+ *   - Why I haven't used static_assert() over the SFINE. Just for func! ;)
 ******************************************************************************/
 
 #ifndef JEJO_PAIR_EXTENDED_T_HPP
@@ -22,6 +23,7 @@
 
 // C++ headers
 #include <iostream>
+#include <type_traits>
 
 JEJO_BEGIN
 
@@ -48,14 +50,16 @@ using is_allowed_arithmetic_t = std::enable_if_t<
  * depending on the template argument.
  * @todo: should be enabled only for arithmetic types!
  */
-template<typename T, typename U> struct PairExt;
+template<typename T, typename U, typename Enable = void> struct PairExt;
 
 template<typename T, typename U>
 auto operator<<(std::ostream &out, const PairExt<T, U>  &p) noexcept ->
                             JeJo::is_allowed_arithmetic_t<T, U, std::ostream&>;
 
 // PairExt<> definition
-template<typename T, typename U> struct PairExt final
+template<typename T, typename U> struct PairExt<
+	T, U, JeJo::is_allowed_arithmetic_t<T, U, void>
+>final
 {
 	// public members
 	T first{};
@@ -63,41 +67,27 @@ template<typename T, typename U> struct PairExt final
 
 	// constructor(s)
 	constexpr explicit PairExt(const T &fir, const U &sec) noexcept
-		: first{fir}, second{sec}
+		: first{ fir }
+		, second{ sec }
 	{}
-	// Copy : enabled
-	PairExt(const PairExt &other) noexcept
-		: first{ other.first },
-		second{ other.second }
-	{}
-	PairExt& operator=(const PairExt &other) noexcept
-	{
-		this->first = other.first;
-		this->second = other.second;
-		return *this;
-	}
-	// Move : enabled
-	constexpr PairExt(PairExt &&other) noexcept
-		: first{std::move(other.first)},
-		second{std::move(other.second)}
-	{}
-	PairExt& operator=(PairExt &&other) noexcept
-	{
-		this->first = std::move(other.first);
-		this->second = std::move(other.second);
-		return *this;
-	}
+	// copy : enabled
+	constexpr PairExt(const PairExt& other) noexcept = default;
+	constexpr PairExt& operator=(const PairExt& other) noexcept = default;
+	// move : enabled
+	constexpr PairExt(PairExt &&other) noexcept = default;
+	constexpr PairExt& operator=(PairExt&& other) noexcept = default;
 
-	// overloaded operator(s)  of the class
-	PairExt& operator++() noexcept
+	// overloaded operator(s)
+	constexpr PairExt& operator++() noexcept
 	{
-		this->first++; this->second++;
+		this->first++;
+		this->second++;
 		return *this;
 	}
 	// post-increment, return unmodified copy by value
-	PairExt operator++(int) noexcept
+	constexpr PairExt operator++(int) noexcept
 	{
-		PairExt copy{ *this };
+		const PairExt copy{ *this };
 		++(*this); // or operator++();
 		return copy;
 	}

@@ -40,7 +40,7 @@ int main()
 		std::cout << "z" << " Not\n";
 #endif
 
-#if 1 // Test : FractionT<>
+#if 0 // Test : FractionT<>
 	for (int i = -10; i <= 15; ++i)
 	{
 		JeJo::Fraction<int> obj{ i, 10 };
@@ -50,6 +50,19 @@ int main()
 	// @todo: implementation for float and doubles
 	// JeJo::Fraction<float> obj1{3.5f, 1.0f};
 	// std::cout << obj1 << "   " << obj1.getReal() << std::endl;
+#endif
+
+#if 1 // Test : PairExtT<>
+	using PairExtDD = JeJo::PairExt<double, double>;
+	std::vector<PairExtDD> vec2(5, JeJo::make_pair(0.1, 1.1));
+
+	for (const auto& pair : vec2)  std::cout << pair;
+
+	const PairExtDD p{ JeJo::make_pair(0.1, 1.1) };
+	std::iota(vec2.begin(), vec2.end(), p);
+	std::cout << "\n";
+
+	for (const auto& pair : vec2)  std::cout << pair;
 #endif
 
 #if 0 // Test : VectorExt<>
@@ -67,18 +80,6 @@ int main()
 	Signal<void()> sg;
 	sg.connect(&lmd);
 	sg.emit();
-#endif
-
-#if 0 // Test : PairExtT<>
-	using PairExtDD = JeJo::PairExt<double, double>;
-	std::vector<PairExtDD> vec2(5, JeJo::make_pair(0.1, 1.1));
-
-	for (const auto& pair : vec2)  std::cout << pair;
-
-	const PairExtDD p{ JeJo::make_pair(0.1, 1.1) };
-	std::iota(vec2.begin(), vec2.end(), p); std::cout << "\n";
-
-	for (const auto& pair : vec2)  std::cout << pair;
 #endif
 	return 0;
 }
