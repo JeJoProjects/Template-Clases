@@ -52,7 +52,7 @@ int main()
 	// std::cout << obj1 << "   " << obj1.getReal() << std::endl;
 #endif
 
-#if 1 // Test : PairExtT<>
+#if 0 // Test : PairExtT<>
 	using PairExtDD = JeJo::PairExt<double, double>;
 	std::vector<PairExtDD> vec2(5, JeJo::make_pair(0.1, 1.1));
 
@@ -65,14 +65,11 @@ int main()
 	for (const auto& pair : vec2)  std::cout << pair;
 #endif
 
-#if 0 // Test : VectorExt<>
-	JeJo::VectorExt<int> obj(10, 1);
-	std::cout << std::make_pair(obj, JeJo::Mode::new_line);
-	std::cout << std::make_pair(obj, JeJo::Mode::space);
-
-	JeJo::VectorExt<int64_t> Obj1 = { 1,8,2,3,4,7,5,6,9,10 };
-	std::cout << std::make_pair(Obj1, JeJo::Mode::space);
-	std::cout << std::make_pair(Obj1, JeJo::Mode::new_line);
+#if 1 // Test : VectorExt<>
+	using JeJo::Mode;
+	JeJo::VectorExt<int64_t> Obj1{ 1,8,2,3,4,7,5,6,9,10 };
+	std::cout << std::make_pair(Obj1, Mode::space);
+	std::cout << std::make_pair(Obj1, Mode::new_line);
 #endif
 
 #if 0 // Test : SignalsT<>

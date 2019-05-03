@@ -95,9 +95,9 @@ private:
 public:
 	// initializer_list constructor
 	explicit constexpr BinarySearch(const std::initializer_list<Type> a)
-		: (!JeJo::has_duplicates(a.begin(), a.end())
-		? _vec{ a }
-		: static_assert(false, " the array has duplicates -> No BS possible!\n"))
+		: /*(!JeJo::has_duplicates(a.begin(), a.end())
+		? */_vec{ a }
+		//: static_assert(false, " the array has duplicates -> No BS possible!\n"))
 	{
 		std::cout <<
 			std::boolalpha << has_duplicates(_vec.cbegin(), _vec.cend());

@@ -23,7 +23,7 @@
 
 JEJO_BEGIN
 
-// enum for for specifying the printing style at each elements
+// enum for specifying the printing style at each elements
 enum class Mode { new_line, space };
 
 // forward declaration
@@ -39,13 +39,12 @@ std::ostream& operator<<(
 	std::ostream& out, const ModePair<Type> &pairObjs) noexcept;
 
 // class definition
-template<typename Type> class VectorExt : public std::vector<Type>
+template<typename Type> class VectorExt final : public std::vector<Type>
 {
 	using std::vector<Type>::vector;
 public:
 	// extended functionality: specialization of operator<< for template "Type".
-	template<typename U>
-	inline friend std::ostream& operator<< <>(
+	template<typename U> friend std::ostream& operator<< <>(
 		std::ostream& out, const ModePair<U> &pairObjs) noexcept;
 };
 
@@ -55,16 +54,11 @@ std::ostream& operator<<(std::ostream& out, const ModePair<Type> &pairObjs) noex
 {
 	if (pairObjs.second == Mode::new_line)  // '\n' case
 	{
-		for (const Type& element : pairObjs.first)
-			out << element << '\n';
+		for (const Type& element : pairObjs.first) out << element << '\n';
+		return out;
 	}
-	else if (pairObjs.second == Mode::space)   // '\t' case
-	{
-		for (const Type& element : pairObjs.first)
-			out << element << " ";
-		out << '\n';
-	}
-	return out;
+	for (const Type& element : pairObjs.first) out << element << " ";
+	return out << '\n';
 }
 
 JEJO_END
