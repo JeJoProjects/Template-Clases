@@ -65,16 +65,16 @@ int main()
 	for (const auto& pair : vec2)  std::cout << pair;
 #endif
 
-#if 1 // Test : VectorExt<>
+#if 0 // Test : VectorExt<>
 	using JeJo::Mode;
 	JeJo::VectorExt<int64_t> Obj1{ 1,8,2,3,4,7,5,6,9,10 };
 	std::cout << std::make_pair(Obj1, Mode::space);
 	std::cout << std::make_pair(Obj1, Mode::new_line);
 #endif
 
-#if 0 // Test : SignalsT<>
-	const auto lmd = []() { std::cout << "Hello Signal\n"; };
-	Signal<void()> sg;
+#if 1 // Test : SignalsT<>
+	constexpr auto lmd = []() { std::cout << "Hello Signal\n"; };
+	Signal<void()> sg{};
 	sg.connect(&lmd);
 	sg.emit();
 #endif

@@ -61,10 +61,10 @@ class Signal<ResT(ArgTs...)> final
 	{
 		// Structure to store target pointers
 		template<typename Class, typename Signature>
-		struct TargetSlot
+		struct TargetSlot final
 		{
 			using SlotFunction = Signature;
-			using SlotInstance = Class*;
+			using SlotInstance = Class *;
 			SlotFunction mp_function;
 			SlotInstance mp_instance;
 		};
@@ -85,42 +85,42 @@ class Signal<ResT(ArgTs...)> final
 		using SlotStorage = Byte[target_size];
 
 		// Type of invoker-function
-		using InvokerType = ResT(*)(const Byte * const, ArgTs&...);
+		using InvokerType = ResT(*)(const Byte* const, ArgTs& ...);
 
 		// Invoke target slot (static method / free function)
 		template<::std::nullptr_t, typename Signature>
-		static ResT invoke(const Byte * const data, ArgTs& ... args)
+		static ResT invoke(const Byte* const data, ArgTs& ... args)
 		{
 			return
-			(*reinterpret_cast<const TargetSlot<::std::nullptr_t, Signature>*>
-			(data)->mp_function)(args...);
+				(*reinterpret_cast<const TargetSlot<::std::nullptr_t, Signature>*>
+				(data)->mp_function)(args...);
 		}
 
 		// Invoke target slot (method)
 		template<typename Class, typename Signature>
-		static ResT invoke(const Byte * const data, ArgTs& ... args)
+		static ResT invoke(const Byte* const data, ArgTs& ... args)
 		{
 			return
-			(reinterpret_cast<const TargetSlot<Class, Signature>*>
-			(data)->mp_instance->*
-			reinterpret_cast<const TargetSlot<Class, Signature>*>
-			(data)->mp_function)(args...);
+				(reinterpret_cast<const TargetSlot<Class, Signature>*>
+				(data)->mp_instance->*
+					reinterpret_cast<const TargetSlot<Class, Signature>*>
+					(data)->mp_function)(args...);
 		}
 
 		// Invoke target slot (functor)
 		template<typename Class, ::std::nullptr_t>
-		static ResT invoke(const Byte * const data, ArgTs& ... args)
+		static ResT invoke(const Byte* const data, ArgTs& ... args)
 		{
 			return
-			(*reinterpret_cast<const TargetSlot<Class, ::std::nullptr_t>*>
-			(data)->mp_instance)(args...);
+				(*reinterpret_cast<const TargetSlot<Class, ::std::nullptr_t>*>
+				(data)->mp_instance)(args...);
 		}
 
 	public:
 
 		// Construct SlotFunctor (static method / free function)
 		explicit SlotFunctor(ResT(*function)(ArgTs...)) noexcept
-		: m_target{}, mp_invoker{ nullptr }
+			: m_target{}, mp_invoker{ nullptr }
 		{
 			using Signature = decltype(function);
 			auto Storage = reinterpret_cast<TargetSlot
@@ -132,8 +132,8 @@ class Signal<ResT(ArgTs...)> final
 
 		// Construct SlotFunctor (method)
 		template<typename Class, typename Signature>
-		SlotFunctor(Class * object, Signature method) noexcept
-		: m_target{}, mp_invoker{ nullptr }
+		SlotFunctor(Class* object, Signature method) noexcept
+			: m_target{}, mp_invoker{ nullptr }
 		{
 			auto Storage = reinterpret_cast<TargetSlot
 				<Class, Signature>*>(&m_target[0]);
@@ -144,8 +144,8 @@ class Signal<ResT(ArgTs...)> final
 
 		// Construct SlotFunctor (functor)
 		template<typename Class>
-		explicit SlotFunctor(Class * functor) noexcept
-		: m_target{}, mp_invoker{ nullptr }
+		explicit SlotFunctor(Class* functor) noexcept
+			: m_target{}, mp_invoker{ nullptr }
 		{
 			auto Storage = reinterpret_cast<TargetSlot
 				<Class, ::std::nullptr_t>*>(&m_target[0]);
@@ -158,7 +158,7 @@ class Signal<ResT(ArgTs...)> final
 		SlotFunctor(::std::nullptr_t)noexcept = delete;
 
 		// Copy-construct SlotFunctor
-		SlotFunctor(const SlotFunctor & other) noexcept
+		SlotFunctor(const SlotFunctor& other) noexcept
 		{
 			::std::copy(other.m_target,
 				other.m_target + target_size, m_target);
@@ -170,7 +170,7 @@ class Signal<ResT(ArgTs...)> final
 		{}
 
 		// Copy-assign SlotFunctor
-		SlotFunctor & operator=(const SlotFunctor & other) noexcept
+		SlotFunctor& operator=(const SlotFunctor& other) noexcept
 		{
 			if (this != &other)
 			{
@@ -188,7 +188,7 @@ class Signal<ResT(ArgTs...)> final
 		}
 
 		// Compare slot_functors (equal)
-		bool operator==(const SlotFunctor & other) const noexcept
+		bool operator==(const SlotFunctor& other) const noexcept
 		{
 			for (size_type index = 0; index < target_size; ++index)
 			{
@@ -201,7 +201,7 @@ class Signal<ResT(ArgTs...)> final
 		}
 
 		// Compare slot_functors (not equal)
-		bool operator!=(const SlotFunctor & other) const noexcept
+		bool operator!=(const SlotFunctor& other) const noexcept
 		{
 			for (size_type index = 0; index < target_size; ++index)
 			{
@@ -225,10 +225,10 @@ class Signal<ResT(ArgTs...)> final
 	public:
 
 		// Construct Connection
-		Connection( const SlotFunctor & slot,
-					const TrackPtr & t_ptr,
-					bool trackable ) noexcept
-		:	m_slot(slot),
+		Connection(const SlotFunctor& slot,
+			const TrackPtr& t_ptr,
+			bool trackable) noexcept
+			: m_slot(slot),
 			m_track_ptr(t_ptr),
 			mp_next(nullptr),
 			mp_deleted(nullptr),
@@ -243,14 +243,14 @@ class Signal<ResT(ArgTs...)> final
 		{}
 
 		// Deleted copy-assignment operator
-		Connection & operator=(const Connection&)noexcept = delete;
+		Connection& operator=(const Connection&)noexcept = delete;
 
 	public:
 
 		SlotFunctor	m_slot;
 		TrackPtr		m_track_ptr;
 		ConnectionPtr	mp_next;
-		Connection *	mp_deleted;
+		Connection* mp_deleted;
 		const bool		m_trackable;
 
 	};
@@ -258,15 +258,15 @@ class Signal<ResT(ArgTs...)> final
 	class Storage final
 	{
 		// Initialize requested memory block
-		void init(Connection * address) noexcept
+		void init(Connection* address) noexcept
 		{
 			mp_store = address;
-			Connection ** current = reinterpret_cast<Connection**>(address);
+			Connection** current = reinterpret_cast<Connection * *>(address);
 
 			for (size_type index = 1; index < m_capacity; ++index)
 			{
 				(*current) = ++address;
-				current = reinterpret_cast<Connection**>(address);
+				current = reinterpret_cast<Connection * *>(address);
 			}
 
 			(*current) = nullptr;
@@ -276,21 +276,21 @@ class Signal<ResT(ArgTs...)> final
 		// May throw exception if memory allocation fails
 		void expand()
 		{
-			Connection * new_block = reinterpret_cast<Connection*>
+			Connection* new_block = reinterpret_cast<Connection*>
 				(NEW_MEMORY(sizeof(Connection) * m_capacity +
 					sizeof(Connection*)));
-			Connection ** next_block = reinterpret_cast<Connection**>
+			Connection * *next_block = reinterpret_cast<Connection * *>
 				(mp_block + m_capacity);
 
 			while (*next_block)
 			{
-				next_block = reinterpret_cast<Connection**>
+				next_block = reinterpret_cast<Connection * *>
 					((*next_block) + m_capacity);
 			}
 
 			(*next_block) = new_block;
 			init(new_block);
-			(*reinterpret_cast<Connection**>
+			(*reinterpret_cast<Connection * *>
 				(new_block + m_capacity)) = nullptr;
 		}
 
@@ -299,12 +299,12 @@ class Signal<ResT(ArgTs...)> final
 		{
 			if (mp_block)
 			{
-				Connection * to_delete = (*reinterpret_cast<Connection**>
+				Connection* to_delete = (*reinterpret_cast<Connection * *>
 					(mp_block + m_capacity));
 
 				while (to_delete)
 				{
-					Connection * block = (*reinterpret_cast<Connection**>
+					Connection* block = (*reinterpret_cast<Connection * *>
 						(to_delete + m_capacity));
 					DELETE_MEMORY(to_delete);
 					to_delete = block;
@@ -319,20 +319,20 @@ class Signal<ResT(ArgTs...)> final
 		// Construct Storage
 		// May throw exception if memory allocation fails
 		Storage(size_type capacity)
-		:	mp_block(nullptr),
+			: mp_block(nullptr),
 			mp_store(nullptr),
 			m_capacity(capacity >= 1 ? capacity : 1)
 		{
 			mp_block = reinterpret_cast<Connection*>(NEW_MEMORY(m_capacity
 				* sizeof(Connection) + sizeof(Connection*)));
 			init(mp_block);
-			(*reinterpret_cast<Connection**>
+			(*reinterpret_cast<Connection * *>
 				(mp_block + m_capacity)) = nullptr;
 		}
 
 		// Move-construct Storage
 		Storage(Storage && other) noexcept
-		:	mp_block(other.mp_block),
+			: mp_block(other.mp_block),
 			mp_store(other.mp_store),
 			m_capacity(other.m_capacity)
 		{
@@ -348,7 +348,7 @@ class Signal<ResT(ArgTs...)> final
 		}
 
 		// Move-assign Storage
-		Storage & operator=(Storage && other) noexcept
+		Storage& operator=(Storage && other) noexcept
 		{
 			clear();
 
@@ -365,29 +365,29 @@ class Signal<ResT(ArgTs...)> final
 
 		// Allocate memory from Storage
 		// May throw exception if memory allocation fails
-		Connection * allocate()
+		Connection* allocate()
 		{
 			if (!mp_store)
 			{
 				expand(); // May throw
 			}
 
-			Connection * current = mp_store;
-			mp_store = (*reinterpret_cast<Connection**>(mp_store));
+			Connection* current = mp_store;
+			mp_store = (*reinterpret_cast<Connection * *>(mp_store));
 			return current;
 		}
 
 		// Deallocate previously allocated memory
 		void deallocate(Connection * address) noexcept
 		{
-			(*reinterpret_cast<Connection**>(address)) = mp_store;
+			(*reinterpret_cast<Connection * *>(address)) = mp_store;
 			mp_store = address;
 		}
 
 	private:
 
-		Connection *	mp_block;
-		Connection *	mp_store;
+		Connection* mp_block;
+		Connection* mp_store;
 		size_type		m_capacity;
 
 	};
@@ -410,7 +410,7 @@ class Signal<ResT(ArgTs...)> final
 		{}
 
 		// Deleted copy-assignment operator
-		SlimLock & operator=(const SlimLock&)noexcept = delete;
+		SlimLock& operator=(const SlimLock&)noexcept = delete;
 
 		// Lock SlimLock. If another thread has already locked this
 		// SlimLock, blocks execution until the lock is acquired.
@@ -447,15 +447,15 @@ class Signal<ResT(ArgTs...)> final
 	public:
 
 		// Construct AutoLock
-		explicit AutoLock(SlimLock & s_lock) noexcept
-		: mp_lock(&s_lock)
+		explicit AutoLock(SlimLock& s_lock) noexcept
+			: mp_lock(&s_lock)
 		{
 			mp_lock->lock();
 		}
 
 		// Move-construct AutoLock
-		AutoLock(AutoLock && other) noexcept
-		: mp_lock(other.mp_lock)
+		AutoLock(AutoLock&& other) noexcept
+			: mp_lock(other.mp_lock)
 		{
 			other.mp_lock = nullptr;
 		}
@@ -470,7 +470,7 @@ class Signal<ResT(ArgTs...)> final
 		}
 
 		// Move-assign AutoLock
-		AutoLock & operator=(AutoLock && other) noexcept
+		AutoLock& operator=(AutoLock&& other) noexcept
 		{
 			mp_lock->unlock();
 			mp_lock = other.mp_lock;
@@ -480,7 +480,7 @@ class Signal<ResT(ArgTs...)> final
 
 	private:
 
-		SlimLock * mp_lock;
+		SlimLock* mp_lock;
 
 	};
 
@@ -489,15 +489,15 @@ class Signal<ResT(ArgTs...)> final
 	public:
 
 		// Construct ReadGuard
-		explicit ReadGuard(CounterType & counter) noexcept
-		: mp_counter(&counter)
+		explicit ReadGuard(CounterType& counter) noexcept
+			: mp_counter(&counter)
 		{
 			++(*mp_counter);
 		}
 
 		// Move-construct ReadGuard
-		ReadGuard(ReadGuard && other) noexcept
-		: mp_counter(other.mp_counter)
+		ReadGuard(ReadGuard&& other) noexcept
+			: mp_counter(other.mp_counter)
 		{
 			other.mp_counter = nullptr;
 		}
@@ -512,7 +512,7 @@ class Signal<ResT(ArgTs...)> final
 		}
 
 		// Move-assign ReadGuard
-		ReadGuard & operator=(ReadGuard && other) noexcept
+		ReadGuard& operator=(ReadGuard&& other) noexcept
 		{
 			--(*mp_counter);
 			mp_counter = other.mp_counter;
@@ -522,7 +522,7 @@ class Signal<ResT(ArgTs...)> final
 
 	private:
 
-		CounterType * mp_counter;
+		CounterType* mp_counter;
 
 	};
 
@@ -544,8 +544,8 @@ class Signal<ResT(ArgTs...)> final
 	// Must be called under write_access() protection.
 	void synchronize() noexcept
 	{
-		Connection ** first = nullptr;
-		Connection * to_delete = nullptr;
+		Connection** first = nullptr;
+		Connection* to_delete = nullptr;
 
 		SyncStage current_stage = m_SyncStage.load();
 
@@ -606,8 +606,8 @@ class Signal<ResT(ArgTs...)> final
 	// Must be called under write_access() protection.
 	void remove(Connection * node) noexcept
 	{
-		Connection ** previous = nullptr;
-		Connection * current = nullptr;
+		Connection** previous = nullptr;
+		Connection* current = nullptr;
 
 		switch (m_SyncStage.load())
 		{
@@ -637,7 +637,7 @@ class Signal<ResT(ArgTs...)> final
 	// Must be called under write_access() protection.
 	void remove_all() noexcept
 	{
-		Connection * to_delete = mp_first_slot.load();
+		Connection* to_delete = mp_first_slot.load();
 
 		if (to_delete)
 		{
@@ -659,7 +659,7 @@ class Signal<ResT(ArgTs...)> final
 	{
 		while (removed)
 		{
-			Connection * to_delete = removed;
+			Connection* to_delete = removed;
 			removed = removed->mp_deleted;
 			to_delete->~Connection();
 			m_Storage.deallocate(to_delete);
@@ -670,13 +670,13 @@ class Signal<ResT(ArgTs...)> final
 	// May throw exception if memory allocation fails
 	// Must be called under write_access() protection
 	bool connect(const SlotFunctor & slot,
-				 const TrackPtr & t_ptr,
-				 bool trackable)
+		const TrackPtr & t_ptr,
+		bool trackable)
 	{
 		synchronize();
 
-		Connection * current = mp_first_slot.load();
-		ConnectionPtr * previous = &mp_first_slot;
+		Connection* current = mp_first_slot.load();
+		ConnectionPtr* previous = &mp_first_slot;
 
 		while (current)
 		{
@@ -691,7 +691,7 @@ class Signal<ResT(ArgTs...)> final
 			}
 		}
 
-		Connection * new_Connection = m_Storage.allocate();
+		Connection* new_Connection = m_Storage.allocate();
 		::new(new_Connection) Connection(slot, t_ptr, trackable);
 		previous->store(new_Connection);
 		return true;
@@ -703,8 +703,8 @@ class Signal<ResT(ArgTs...)> final
 	{
 		synchronize();
 
-		Connection * current = mp_first_slot.load();
-		ConnectionPtr * previous = &mp_first_slot;
+		Connection* current = mp_first_slot.load();
+		ConnectionPtr* previous = &mp_first_slot;
 
 		while (current)
 		{
@@ -728,7 +728,7 @@ class Signal<ResT(ArgTs...)> final
 	// Must be called under read_access() protection
 	bool connected(const SlotFunctor & slot) const noexcept
 	{
-		Connection * current = mp_first_slot.load();
+		Connection* current = mp_first_slot.load();
 
 		while (current)
 		{
@@ -748,9 +748,9 @@ class Signal<ResT(ArgTs...)> final
 	// Activate Signal
 	// May throw exception if some slot does
 	// Must be called under read_access() protection
-	void activate(ArgTs& ... args)
+	void activate(ArgTs & ... args)
 	{
-		Connection * current = mp_first_slot.load();
+		Connection* current = mp_first_slot.load();
 
 		while (current)
 		{
@@ -770,7 +770,7 @@ class Signal<ResT(ArgTs...)> final
 				}
 				else
 				{
-					Connection * to_delete = current;
+					Connection* to_delete = current;
 					current = current->mp_next.load();
 					auto writer = write_access();
 					disconnect(to_delete->m_slot);
@@ -784,37 +784,37 @@ public:
 	// Construct Signal with provided / default capacity
 	// May throw exception if memory allocation fails
 	explicit Signal(size_type capacity = 5)
-	:	m_Storage(capacity),
-		mp_first_slot(nullptr),
-		mp_deleted_s1(nullptr),
-		mp_deleted_s2(nullptr),
-		m_access_s1(0),
-		m_access_s2(0),
-		m_write_lock(),
-		m_SyncStage(SyncStage::SyncStage_1),
-		m_blocked(false)
+		: m_Storage{ capacity }
+		, mp_first_slot{ nullptr }
+		, mp_deleted_s1{ nullptr }
+		, mp_deleted_s2{ nullptr }
+		, m_access_s1{ 0 }
+		, m_access_s2{ 0 }
+		, m_write_lock{}
+		, m_SyncStage{ SyncStage::SyncStage_1 }
+		, m_blocked{ false }
 	{}
 
 	// Deleted copy-constructor
-	Signal(const Signal &) noexcept = delete;
+	constexpr Signal(const Signal&) noexcept = delete;
 
 	// Destroy Signal
 	~Signal() noexcept
 	{
-		auto writer = write_access();
-		remove_all();
-		clear(mp_deleted_s1);
-		clear(mp_deleted_s2);
+		const auto writer{ this->write_access() };
+		this->remove_all();
+		this->clear(mp_deleted_s1);
+		this->clear(mp_deleted_s2);
 	}
 
 	// Deleted copy-assignment operator
-	Signal & operator=(const Signal &) noexcept = delete;
+	constexpr Signal& operator=(const Signal&) noexcept = delete;
 
 	// Connect Signal to slot (static method / free function)
 	// May throw exception if memory allocation fails
 	bool connect(ResT(*function)(ArgTs...))
 	{
-		auto writer = write_access();
+		const auto writer{ write_access() };
 		return connect(SlotFunctor(function), TrackPtr(), false);
 	}
 
@@ -977,7 +977,7 @@ public:
 	size_type size() const noexcept
 	{
 		auto writer = write_access();
-		Connection * current = mp_first_slot.load();
+		Connection* current = mp_first_slot.load();
 		size_type size = 0;
 
 		while (current)
@@ -999,8 +999,8 @@ private:
 
 	Storage					m_Storage;
 	ConnectionPtr			mp_first_slot;
-	Connection *			mp_deleted_s1;
-	Connection *			mp_deleted_s2;
+	Connection* mp_deleted_s1;
+	Connection* mp_deleted_s2;
 	mutable CounterType	m_access_s1;
 	mutable CounterType	m_access_s2;
 	mutable SlimLock		m_write_lock;
@@ -1018,11 +1018,11 @@ private:
 // May throw std::bad_alloc exception if memory allocation fails.
 // _Ty's constructor must not throw.
 template<typename _Ty, typename ... ArgTs>
-::std::shared_ptr<_Ty> create_shared_object(ArgTs&& ... args)
+::std::shared_ptr<_Ty> create_shared_object(ArgTs && ... args)
 {
-	_Ty * address = static_cast<_Ty*>(NEW_MEMORY(sizeof(_Ty)));
+	_Ty* address = static_cast<_Ty*>(NEW_MEMORY(sizeof(_Ty)));
 	::std::shared_ptr<_Ty> sh_ptr(address,
-	[](_Ty * ptr) { ptr->~_Ty(); DELETE_MEMORY(ptr); });
+		[](_Ty * ptr) { ptr->~_Ty(); DELETE_MEMORY(ptr); });
 	::new (address) _Ty(sh_ptr, ::std::forward<ArgTs>(args)...);
 	return ::std::move(sh_ptr);
 }
@@ -1034,13 +1034,13 @@ template<typename _Ty, typename ... ArgTs>
 // May throw std::bad_alloc exception if memory allocation fails.
 // _Ty's constructor must not throw.
 template<typename _Ty, typename _Alloc, typename ... ArgTs>
-::std::shared_ptr<_Ty> allocate_shared_object(const _Alloc & alloc, ArgTs&& ... args)
+::std::shared_ptr<_Ty> allocate_shared_object(const _Alloc & alloc, ArgTs && ... args)
 {
 	_Alloc _allocator(alloc);
-	_Ty * address = _allocator.allocate(1);
+	_Ty* address = _allocator.allocate(1);
 	::std::shared_ptr<_Ty> sh_ptr(address,
-	[_allocator](_Ty * ptr) mutable
-	{ _allocator.destroy(ptr); _allocator.deallocate(ptr, 1); }, _allocator);
+		[_allocator](_Ty * ptr) mutable
+		{ _allocator.destroy(ptr); _allocator.deallocate(ptr, 1); }, _allocator);
 	_allocator.construct(address, sh_ptr, ::std::forward<ArgTs>(args)...);
 	return ::std::move(sh_ptr);
 }
