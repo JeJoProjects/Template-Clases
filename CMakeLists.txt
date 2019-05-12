@@ -11,8 +11,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_subdirectory (Algorithms)
 set(JEJO_ALGO_INCLUDE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/Algorithms)
 
-add_subdirectory (SFINAE)
-set(JEJO_SFINAE_INCLUDE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/SFINAE)
+add_subdirectory (Traits&SFINE)
+set(JEJO_SFINAE_INCLUDE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/Traits&SFINE)
 
 add_subdirectory (JeJoProjects)
 set(JEJO_TEMPLATE_PROJECTS_INCLUDE_DIR  ${CMAKE_CURRENT_SOURCE_DIR}/JeJoProjects)
