@@ -10,6 +10,7 @@
 // #include "ShapeT.hpp" //@todo: need implementation
 #include "SignalsT.hpp"
 #include "VectorExtendedT.hpp"
+#include "GenericVectorT.hpp"
 
 
 int main()
@@ -72,11 +73,19 @@ int main()
 	std::cout << std::make_pair(Obj1, Mode::new_line);
 #endif
 
-#if 1 // Test : SignalsT<>
+#if 0 // Test : SignalsT<>
 	constexpr auto lmd = []() { std::cout << "Hello Signal\n"; };
 	Signal<void()> sg{};
 	sg.connect(&lmd);
 	sg.emit();
+#endif
+
+
+#if 1 // Test : GenericVectorT<>
+	
+	GenericVectorT<float> mat{};
+	auto pair = std::pair<float, float>{ 0.0f, 5.0f };
+	mat.updateMinMax(pair);
 #endif
 	return 0;
 }

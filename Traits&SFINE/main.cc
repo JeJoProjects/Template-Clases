@@ -25,7 +25,6 @@ int main()
 #if 1
 	class_type<decltype(&MyStruct::foo)> obj{};
 	ret_type<decltype(&MyStruct::foo)> a{ obj.foo(1) };
-
 #endif
 	return  0;
 }
