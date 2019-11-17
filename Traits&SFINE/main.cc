@@ -5,8 +5,16 @@
 #include "SFINAE.hpp"
 #include "Traits.hpp"
 
+#include <vector>
+
+class MyClass
+{
+	using vec = std::vector<int>;
+};
+
 int main()
 {
+	
 #if 0
 	std::cout << Function(nullptr)	<< " ";
 	std::cout << Function(2)		<< " ";
@@ -15,8 +23,8 @@ int main()
 #endif 
 
 #if 1
-	get_class_t<decltype(&MyStruct::foo)> obj{};
-	obj.foo();
+	class_type<decltype(&MyStruct::foo)> obj{};
+	ret_type<decltype(&MyStruct::foo)> a{ obj.foo(1) };
 
 #endif
 	return  0;
