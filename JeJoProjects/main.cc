@@ -15,7 +15,7 @@
 
 int main()
 {
-#if 0 // Test : BinarySearchT<>
+#if 1 // Test : BinarySearchT<>
 	// Test - 1: integers
 	JeJo::BinarySearch<int> Arr0{ 1,  2,  3, 4, 5, 8 };
 
