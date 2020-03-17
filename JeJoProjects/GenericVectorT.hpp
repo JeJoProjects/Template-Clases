@@ -35,7 +35,7 @@ public:
 			minMaxCompare.second = std::min(minMaxCompare.second, element);
 		}
 	}
-#if 1
+#if 0
 	template<typename T = Type>
 	auto updateMinMax(std::pair<T, T>& minMaxCompare) noexcept
 		-> std::enable_if_t<!is_SimpleGenericVector<T>::value>

@@ -2,7 +2,8 @@
 #include <iostream>
 #include <vector>
 
-/* traits for finding the class type and, return type of the member function,
+/****************************************************************************
+ * traits for finding the class type and, return type of the member function,
  * from the pointer to the member function of any arbitrary class.
  */
 
@@ -20,13 +21,20 @@ struct class_traits<ReType(Class::*)(Args...)> final
 template<typename MemFunctionPtr> using  class_type = typename class_traits<MemFunctionPtr>::class_type;
 template<typename MemFunctionPtr> using  ret_type = typename class_traits<MemFunctionPtr>::ret_type;
 
-
-struct MyStruct
+// example
+namespace JeJo
 {
-	int foo(int a) /*const noexcept*/ { std::cout << "foo from MyStruct...: " << a << "\n"; return a; }
-};
+   struct MyStruct
+   {
+      int foo(int a) /*const noexcept*/
+      {
+         std::cout << "foo from MyStruct...: " << a << "\n"; return a;
+      }
+   };
+} // namespace JeJo
 
-/*
+
+/****************************************************************************
  *
  */
 
@@ -40,5 +48,10 @@ template<typename> struct is_simple_vector final : std::false_type {};
 template<typename T, typename... Args>
 struct is_simple_vector<std::vector<T, Args...>> final
 {
-	static constexpr bool value = is_std_vector<T>::value == false && std::is_floating_point_v<T> == true;
+	static constexpr bool value
+      = is_std_vector<T>::value == false && std::is_floating_point_v<T> == true;
 };
+
+/****************************************************************************
+ *
+ */
