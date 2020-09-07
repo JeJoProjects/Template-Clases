@@ -15,7 +15,7 @@
 
 int main()
 {
-#if 1 // Test : BinarySearchT<>
+#if 0 // Test : BinarySearchT<>
 	// Test - 1: integers
 	JeJo::BinarySearch<int> Arr0{ 1,  2,  3, 4, 5, 8 };
 
@@ -83,9 +83,27 @@ int main()
 
 #if 1 // Test : GenericVectorT<>
 	
-	GenericVectorT<float> mat{};
-	auto pair = std::pair<float, float>{ 0.0f, 5.0f };
-	mat.updateMinMax(pair);
+	GenericVectorT<float> mat1D{1.58f, 2.f, 3.4f};
+	std::cout << "Main() - mat1D Result: " << mat1D.updateMinMax() << "\n\n";
+
+
+	GenericVectorT<GenericVectorT<float>> mat2D{ {1.58f, 2.f, 3.4f}, {-1.58f, 20.f, 3.4f}, {100.f, 200.11f } };
+	std::cout << "Main() - mat2D Result: " << mat2D.updateMinMax() << "\n\n";
+	mat2D.emplace_back(GenericVectorT<float>{ -1000.f }); // std::vector will also work!
+	std::cout << "Main() - mat2D Result: " << mat2D.updateMinMax() << "\n\n";
+
+
+	GenericVectorT<GenericVectorT<GenericVectorT<int>>> mat3D
+	{
+		{ 
+			{5, 4, 8}, {-8, 9, 8, 8 }
+		},
+		{ 
+			{15, 40, 88}, {-80 }
+		} 
+	};
+	std::cout << "Main() - mat2D Result: " << mat3D.updateMinMax() << "\n\n";
+
 #endif
 	return 0;
 }
