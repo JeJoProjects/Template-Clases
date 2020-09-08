@@ -102,7 +102,7 @@ int main()
 			{15, 40, 88}, {-80 }
 		} 
 	};
-	std::cout << "Main() - mat2D Result: " << mat3D.updateMinMax() << "\n\n";
+	std::cout << "Main() - mat2D Result: " << mat3D.updateMinMax({0, 40}) << "\n\n";
 
 #endif
 	return 0;

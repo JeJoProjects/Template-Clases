@@ -52,7 +52,7 @@ class GenericVectorT final : public std::vector<Type>
       static constexpr MinMaxPair getmMinMaxElements(
          const Vector& vec, const MinMaxPair& minMaxPair) noexcept
       {
-         MinMaxPair result{  };
+         MinMaxPair result{ minMaxPair};
          // value type of the passed `GenericVectorT<Type>`
          using ValueType = std::remove_const_t<
             std::remove_reference_t<typename Vector::value_type>
@@ -61,8 +61,8 @@ class GenericVectorT final : public std::vector<Type>
          if constexpr (isAllowedType<ValueType>)
          {
             const auto [min, max] = std::minmax_element(std::cbegin(vec), std::cend(vec));
-            result.first = std::min(result.first, *min);
-            result.second = std::max(result.second, *max);
+            result.first = min != std::cend(vec) ? std::min(result.first, *min) : result.first;
+            result.second = max != std::cend(vec) ? std::max(result.second, *max): result.second;
             return result; // return the result!
          }
          else
