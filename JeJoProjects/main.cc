@@ -11,6 +11,7 @@
 #include "SignalsT.hpp"
 #include "VectorExtendedT.hpp"
 #include "GenericVectorT.hpp"
+#include "ForwardCountingIterator.hpp"
 
 
 int main()
@@ -81,8 +82,7 @@ int main()
 #endif
 
 
-#if 1 // Test : GenericVectorT<>
-	
+#if 0 // Test : GenericVectorT<>	
 	GenericVectorT<float> mat1D{1.58f, 2.f, 3.4f};
 	std::cout << "Main() - mat1D Result: " << mat1D.updateMinMax() << "\n\n";
 
@@ -103,7 +103,19 @@ int main()
 		} 
 	};
 	std::cout << "Main() - mat2D Result: " << mat3D.updateMinMax({0, 40}) << "\n\n";
+#endif
 
+#if 1 // Test : Forward and reverse iterator by indexes.
+	std::vector<int> vec(10);
+
+	std::cout << "size of the vector: " << std::size(vec) << '\n';
+
+	std::cout << "Range [0, ArraySize): "; JeJo::testForward(std::size(vec));
+	std::cout << "Range (ArraySize, 0]: "; JeJo::testReverse(std::size(vec));
+
+	JeJo::TArray<float> arr(1);
+	std::cout << "Range [0, ArraySize): "; JeJo::testForward(std::size(arr));
+	std::cout << "Range (ArraySize, 0]: "; JeJo::testReverse(std::size(arr));
 #endif
 	return 0;
 }

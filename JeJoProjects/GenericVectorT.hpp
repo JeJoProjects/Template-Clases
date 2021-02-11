@@ -2,20 +2,28 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <array>
 #include <numeric>
 #include <type_traits> // std::is_floating_point_v, std::is_integral_v, std::is_same_v
                        // std::remove_const_t, std::remove_reference_t
 
 // traits for finding the innermost template type
-template<typename Type> struct innermost_impl final { using type = Type; };
+// https://stackoverflow.com/questions/25187323/
+template<typename Type> struct inner_most final { using type = Type; };
 
 template<template<typename...> class ClassType, typename Type, typename... Rest>
-struct innermost_impl<ClassType<Type, Rest...>> final
+struct inner_most<ClassType<Type, Rest...>> final
 {
-   using type = typename innermost_impl<Type>::type;
+   using type = typename inner_most<Type>::type;
 };
 
-template<typename T> using innermost_t = typename innermost_impl<T>::type;
+template <typename T, std::size_t N>
+struct inner_most<std::array<T, N>> final
+{
+   using type = typename inner_most<T>::type;
+};
+
+template<typename T> using innermost_t = typename inner_most<T>::type;
 
 
 // allowed types for finding the min and max!
