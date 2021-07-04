@@ -14,8 +14,10 @@
  // C++ headers
 #include <cstddef>		// std::size_t, std::nullptr_t
 #include <utility>		// std::move(), std::forward<>()
-#include <algorithm>	// std::copy()
-#include <new>			// ::new()
+#include <algorithm>	// std::copy(), std::find_if()
+#include <array>        // std::array<>, std::cbegin(), ::std::cend()
+#include <functional>   // std::invoke()
+#include <new>			// new()
 #include <atomic>		// std::atomic<>, std::atomic_flag
 #include <memory>		// std::shared_ptr<>, std::weak_ptr<>
 #include <thread>		// std::this_thread
@@ -65,7 +67,7 @@ class Signal<ReType(Args...)> final
 	class ReadGuard;
 
 	// Synchronization stage. Specifies current access stage.
-	enum class SyncStage : char { SyncStage_1 = 1, SyncStage_2 = 2 };
+	enum struct SyncStage : char { SyncStage_1 = 1, SyncStage_2 = 2 };
 
 	using Byte				= unsigned char;
 	using size_type			= ::std::size_t;
@@ -99,7 +101,7 @@ class Signal<ReType(Args...)> final
 		static const size_type target_size = sizeof(DefaultType);
 
 		// Storage for target data
-		using SlotStorage = Byte[target_size];
+		using SlotStorage = ::std::array<Byte, target_size>;
 
 		// Type of invoker-function
 		using InvokerType = ReType(*)(const Byte* const, Args&&...);
@@ -113,7 +115,7 @@ class Signal<ReType(Args...)> final
 		{
 			return
 				(*reinterpret_cast<const TargetSlot<::std::nullptr_t, FunctionPtrType>*>
-				(data)->mFunctionPtr)(std::forward<Args>(args)...);
+				(data)->mFunctionPtr)(::std::forward<Args>(args)...);
 		}
 
 		// Invoke target slot (method)
@@ -124,7 +126,7 @@ class Signal<ReType(Args...)> final
 				(reinterpret_cast<const TargetSlot<ClassType, FunctionPtrType>*>
 				(data)->mClassInstance->*
 					reinterpret_cast<const TargetSlot<ClassType, FunctionPtrType>*>
-					(data)->mFunctionPtr)(std::forward<Args>(args)...);
+					(data)->mFunctionPtr)(::std::forward<Args>(args)...);
 		}
 
 		// Invoke target slot (functor)
@@ -133,7 +135,7 @@ class Signal<ReType(Args...)> final
 		{
 			return
 				(*reinterpret_cast<const TargetSlot<ClassType, ::std::nullptr_t>*>
-				(data)->mClassInstance)(std::forward<Args>(args)...);
+				(data)->mClassInstance)(::std::forward<Args>(args)...);
 		}
 
 	public:
@@ -179,7 +181,12 @@ class Signal<ReType(Args...)> final
 		// Copy-construct Slot
 		Slot(const Slot& other) noexcept
 		{
-			::std::copy(other.mTarget, other.mTarget + target_size, mTarget);
+			::std::copy(
+				::std::cbegin(other.mTarget)
+				, ::std::cend(other.mTarget)
+				, ::std::begin(mTarget)
+			);
+
 			mInvoker = other.mInvoker;
 		}
 
@@ -191,7 +198,12 @@ class Signal<ReType(Args...)> final
 		{
 			if (this != &other)
 			{
-				::std::copy(other.mTarget, other.mTarget + target_size, mTarget);
+				::std::copy(
+					::std::cbegin(other.mTarget)
+					, ::std::cend(other.mTarget)
+					, ::std::begin(mTarget)
+				);
+
 				mInvoker = other.mInvoker;
 			}
 			return *this;
@@ -200,7 +212,8 @@ class Signal<ReType(Args...)> final
 		// Invoke target slot
 		ReType operator()(Args&&... args) const
 		{
-			return (*mInvoker)(&mTarget[0], std::forward<Args>(args)...);
+			// return (*mInvoker)(&mTarget[0], ::std::forward<Args>(args)...);
+			return  ::std::invoke(*mInvoker, &mTarget[0], ::std::forward<Args>(args)...);
 		}
 
 		// Compare slot_functors (equal)
@@ -208,12 +221,12 @@ class Signal<ReType(Args...)> final
 		{
 			for (size_type index = 0; index < target_size; ++index)
 			{
-				if (mTarget[index] != other.mTarget[index])
+				if (mTarget[index] == other.mTarget[index])
 				{
-					return false;
+					return true;
 				}
 			}
-			return true;
+			return false;
 		}
 
 		// Compare slot_functors (not equal)
@@ -228,7 +241,6 @@ class Signal<ReType(Args...)> final
 			}
 			return false;
 		}
-
 	};
 
 	class Connection final
