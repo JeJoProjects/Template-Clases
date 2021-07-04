@@ -13,9 +13,60 @@
 #include "GenericVectorT.hpp"
 #include "ForwardCountingIterator.hpp"
 
+void freeFunction(int arg, std::string str)
+{
+	std::cout << "Calling free function: \"Hello Signal\" - " << arg << " " << (str) << "\n";
+}
+
+constexpr auto lmd = [](int arg, std::string str)
+{
+	std::cout << "Calling Lambda function: \"Hello Signal\" - " << arg << " " << (str) << "\n";
+};
+
+template<typename Type>
+class TestSignal final
+{
+	Type mSignal;
+
+	struct Context {};
+public:
+	TestSignal() = default;
+
+	void test1()
+	{
+
+		mSignal.connect(&freeFunction);
+		mSignal.connect(&lmd);
+
+		mSignal.emit(1, "string");
+	}
+
+	void test2()
+	{
+		{
+			// @todo : impliment the context object case
+			// Context obj;
+			// mSignal.connect(&obj, &freeFunction);
+			// mSignal.connect(&obj, &lmd);
+		}
+
+		mSignal.emit(1, "string");
+	}
+
+};
+
 
 int main()
 {
+#if 1 // Test : SignalsT<>
+	
+	TestSignal<JeJo::Signal<void(int, std::string)>> testSignalObj;
+	testSignalObj.test1();
+	testSignalObj.test2();
+
+#endif
+
+
 #if 0 // Test : BinarySearchT<>
 	// Test - 1: integers
 	JeJo::BinarySearch<int> Arr0{ 1,  2,  3, 4, 5, 8 };
@@ -74,13 +125,6 @@ int main()
 	std::cout << std::make_pair(Obj1, Mode::new_line);
 #endif
 
-#if 0 // Test : SignalsT<>
-	constexpr auto lmd = []() { std::cout << "Hello Signal\n"; };
-	Signal<void()> sg{};
-	sg.connect(&lmd);
-	sg.emit();
-#endif
-
 
 #if 0 // Test : GenericVectorT<>	
 	GenericVectorT<float> mat1D{1.58f, 2.f, 3.4f};
@@ -105,7 +149,7 @@ int main()
 	std::cout << "Main() - mat2D Result: " << mat3D.updateMinMax({0, 40}) << "\n\n";
 #endif
 
-#if 1 // Test : Forward and reverse iterator by indexes.
+#if 0 // Test : Forward and reverse iterator by indexes.
 	std::vector<int> vec(10);
 
 	std::cout << "size of the vector: " << std::size(vec) << '\n';

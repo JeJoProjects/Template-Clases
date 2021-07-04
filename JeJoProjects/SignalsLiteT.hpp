@@ -40,7 +40,7 @@ class Signal<ResT(ArgTs...)> final
 		template<typename Class, typename Signature>
 		struct TargetSlot
 		{
-			using SlotFunction = Signature;
+			using Signature = Signature;
 			using SlotInstance = Class * ;
 			SlotFunction mp_function;
 			SlotInstance mp_instance;

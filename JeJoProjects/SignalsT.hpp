@@ -1,6 +1,17 @@
-#ifndef SignalS_T_HPP
-#define SignalS_T_HPP
+/******************************************************************************
+ * Implementation of Signal<>, which provides a template 
+ *
+ * @Authur :  JeJo
+ * @Date   :  June - 2021
+ * @license: free to use and distribute(no further support as well)
+ *
+ * @todo: explanation and limitations of the class
+ *****************************************************************************/
 
+#ifndef JEJO_SignalS_T_HPP
+#define JEJO_SignalS_T_HPP
+
+ // C++ headers
 #include <cstddef>		// std::size_t, std::nullptr_t
 #include <utility>		// std::move(), std::forward<>()
 #include <algorithm>	// std::copy()
@@ -9,21 +20,28 @@
 #include <memory>		// std::shared_ptr<>, std::weak_ptr<>
 #include <thread>		// std::this_thread
 
+// own JeJo-lib headers
+
+// macros for name-spacing
+#define JEJO_BEGIN namespace JeJo {
+#define JEJO_END   }
 
 // Macros for dynamic memory allocation
 #define NEW_MEMORY(arg) ::operator new(arg)
 #define DELETE_MEMORY(arg) ::operator delete(arg)
 
+JEJO_BEGIN
+
 // TEMPLATE CLASS Signal
-template<typename ResT, typename ... ArgTs>
+template<typename ReType, typename... Args>
 class Signal;
 
-template<typename ResT, typename ... ArgTs>
-class Signal<ResT(ArgTs...)> final
+template<typename ReType, typename... Args>
+class Signal<ReType(Args...)> final
 {
-	// Unified function pointer wrapper. Instances of SlotFunctor
+	// Unified function pointer wrapper. Instances of Slot
 	// can store, copy, and invoke any callable target (slot).
-	class SlotFunctor;
+	class Slot;
 
 	// Node in linked list of connected slots. Contains information
 	// related to a particular Connection between a Signal and a slot.
@@ -38,11 +56,11 @@ class Signal<ResT(ArgTs...)> final
 	// and occupies very little memory. Meets Lockable requirements.
 	class SlimLock;
 
-	// Class AutoLock is a SlimLock ownership wrapper that provides a
+	// ClassType AutoLock is a SlimLock ownership wrapper that provides a
 	// convenient RAII-style mechanism for automatic locking / unlocking.
 	class AutoLock;
 
-	// Class ReadGuard is a stage counter ownership wrapper. Provides
+	// ClassType ReadGuard is a stage counter ownership wrapper. Provides
 	// a convenient RAII-style mechanism for automatic increm / decrem.
 	class ReadGuard;
 
@@ -57,16 +75,15 @@ class Signal<ResT(ArgTs...)> final
 	using ConnectionPtr	    = ::std::atomic<Connection*>;
 	using TrackPtr			= ::std::weak_ptr<void>;
 
-	class SlotFunctor final
+	class Slot final
 	{
+	private:
 		// Structure to store target pointers
-		template<typename Class, typename Signature>
+		template<typename ClassType, typename FunctionPtrType>
 		struct TargetSlot final
 		{
-			using SlotFunction = Signature;
-			using SlotInstance = Class *;
-			SlotFunction mp_function;
-			SlotInstance mp_instance;
+			ClassType* mClassInstance;
+			FunctionPtrType mFunctionPtr;
 		};
 
 		// Unknown default class (undefined)
@@ -85,114 +102,113 @@ class Signal<ResT(ArgTs...)> final
 		using SlotStorage = Byte[target_size];
 
 		// Type of invoker-function
-		using InvokerType = ResT(*)(const Byte* const, ArgTs& ...);
+		using InvokerType = ReType(*)(const Byte* const, Args&&...);
+
+		alignas(DefaultType)SlotStorage mTarget;
+		alignas(InvokerType)InvokerType mInvoker;
 
 		// Invoke target slot (static method / free function)
-		template<::std::nullptr_t, typename Signature>
-		static ResT invoke(const Byte* const data, ArgTs& ... args)
+		template<::std::nullptr_t, typename FunctionPtrType>
+		static ReType invoke(const Byte* const data, Args&&... args)
 		{
 			return
-				(*reinterpret_cast<const TargetSlot<::std::nullptr_t, Signature>*>
-				(data)->mp_function)(args...);
+				(*reinterpret_cast<const TargetSlot<::std::nullptr_t, FunctionPtrType>*>
+				(data)->mFunctionPtr)(std::forward<Args>(args)...);
 		}
 
 		// Invoke target slot (method)
-		template<typename Class, typename Signature>
-		static ResT invoke(const Byte* const data, ArgTs& ... args)
+		template<typename ClassType, typename FunctionPtrType>
+		static ReType invoke(const Byte* const data, Args&&... args)
 		{
 			return
-				(reinterpret_cast<const TargetSlot<Class, Signature>*>
-				(data)->mp_instance->*
-					reinterpret_cast<const TargetSlot<Class, Signature>*>
-					(data)->mp_function)(args...);
+				(reinterpret_cast<const TargetSlot<ClassType, FunctionPtrType>*>
+				(data)->mClassInstance->*
+					reinterpret_cast<const TargetSlot<ClassType, FunctionPtrType>*>
+					(data)->mFunctionPtr)(std::forward<Args>(args)...);
 		}
 
 		// Invoke target slot (functor)
-		template<typename Class, ::std::nullptr_t>
-		static ResT invoke(const Byte* const data, ArgTs& ... args)
+		template<typename ClassType, ::std::nullptr_t>
+		static ReType invoke(const Byte* const data, Args&&... args)
 		{
 			return
-				(*reinterpret_cast<const TargetSlot<Class, ::std::nullptr_t>*>
-				(data)->mp_instance)(args...);
+				(*reinterpret_cast<const TargetSlot<ClassType, ::std::nullptr_t>*>
+				(data)->mClassInstance)(std::forward<Args>(args)...);
 		}
 
 	public:
-
-		// Construct SlotFunctor (static method / free function)
-		explicit SlotFunctor(ResT(*function)(ArgTs...)) noexcept
-			: m_target{}, mp_invoker{ nullptr }
+		// Construct Slot (static method / free function)
+		explicit Slot(ReType(*function)(Args&&...)) noexcept
+			: mTarget{}
+			, mInvoker{ nullptr }
 		{
-			using Signature = decltype(function);
-			auto Storage = reinterpret_cast<TargetSlot
-				<::std::nullptr_t, Signature>*>(&m_target[0]);
-			Storage->mp_function = function;
-			Storage->mp_instance = nullptr;
-			mp_invoker = &SlotFunctor::invoke<nullptr, Signature>;
+			using FunctionPtrType = decltype(function);
+			auto Storage = reinterpret_cast<TargetSlot<::std::nullptr_t, FunctionPtrType>*>(&mTarget[0]);
+			Storage->mFunctionPtr = function;
+			Storage->mClassInstance = nullptr;
+			mInvoker = &Slot::invoke<nullptr, FunctionPtrType>;
 		}
 
-		// Construct SlotFunctor (method)
-		template<typename Class, typename Signature>
-		SlotFunctor(Class* object, Signature method) noexcept
-			: m_target{}, mp_invoker{ nullptr }
+		// Construct Slot (method)
+		template<typename ClassType, typename FunctionPtrType>
+		Slot(ClassType* object, FunctionPtrType method) noexcept
+			: mTarget{}
+			, mInvoker{ nullptr }
 		{
-			auto Storage = reinterpret_cast<TargetSlot
-				<Class, Signature>*>(&m_target[0]);
-			Storage->mp_function = method;
-			Storage->mp_instance = object;
-			mp_invoker = &SlotFunctor::invoke<Class, Signature>;
+			auto Storage = reinterpret_cast<TargetSlot<ClassType, FunctionPtrType>*>(&mTarget[0]);
+			Storage->mFunctionPtr = method;
+			Storage->mClassInstance = object;
+			mInvoker = &Slot::invoke<ClassType, FunctionPtrType>;
 		}
 
-		// Construct SlotFunctor (functor)
-		template<typename Class>
-		explicit SlotFunctor(Class* functor) noexcept
-			: m_target{}, mp_invoker{ nullptr }
+		// Construct Slot (functor)
+		template<typename ClassType>
+		explicit Slot(ClassType* functor) noexcept
+			: mTarget{}
+			, mInvoker{ nullptr }
 		{
-			auto Storage = reinterpret_cast<TargetSlot
-				<Class, ::std::nullptr_t>*>(&m_target[0]);
-			Storage->mp_function = nullptr;
-			Storage->mp_instance = functor;
-			mp_invoker = &SlotFunctor::invoke<Class, nullptr>;
+			auto Storage = reinterpret_cast<TargetSlot<ClassType, ::std::nullptr_t>*>(&mTarget[0]);
+			Storage->mFunctionPtr = nullptr;
+			Storage->mClassInstance = functor;
+			mInvoker = &Slot::invoke<ClassType, nullptr>;
 		}
 
 		// Deleted constructor (null pointer)
-		SlotFunctor(::std::nullptr_t)noexcept = delete;
+		Slot(::std::nullptr_t) noexcept = delete;
 
-		// Copy-construct SlotFunctor
-		SlotFunctor(const SlotFunctor& other) noexcept
+		// Copy-construct Slot
+		Slot(const Slot& other) noexcept
 		{
-			::std::copy(other.m_target,
-				other.m_target + target_size, m_target);
-			mp_invoker = other.mp_invoker;
+			::std::copy(other.mTarget, other.mTarget + target_size, mTarget);
+			mInvoker = other.mInvoker;
 		}
 
-		// Destroy SlotFunctor
-		~SlotFunctor() noexcept
-		{}
+		// Destroy Slot
+		~Slot() noexcept = default;
 
-		// Copy-assign SlotFunctor
-		SlotFunctor& operator=(const SlotFunctor& other) noexcept
+		// Copy-assign Slot
+		Slot& operator=(const Slot& other) noexcept
 		{
 			if (this != &other)
 			{
-				::std::copy(other.m_target,
-					other.m_target + target_size, m_target);
-				mp_invoker = other.mp_invoker;
+				::std::copy(other.mTarget, other.mTarget + target_size, mTarget);
+				mInvoker = other.mInvoker;
 			}
 			return *this;
 		}
 
 		// Invoke target slot
-		ResT operator()(ArgTs& ... args) const
+		ReType operator()(Args&&... args) const
 		{
-			return (*mp_invoker)(&m_target[0], args...);
+			return (*mInvoker)(&mTarget[0], std::forward<Args>(args)...);
 		}
 
 		// Compare slot_functors (equal)
-		bool operator==(const SlotFunctor& other) const noexcept
+		bool operator==(const Slot& other) const noexcept
 		{
 			for (size_type index = 0; index < target_size; ++index)
 			{
-				if (m_target[index] != other.m_target[index])
+				if (mTarget[index] != other.mTarget[index])
 				{
 					return false;
 				}
@@ -201,11 +217,11 @@ class Signal<ResT(ArgTs...)> final
 		}
 
 		// Compare slot_functors (not equal)
-		bool operator!=(const SlotFunctor& other) const noexcept
+		bool operator!=(const Slot& other) const noexcept
 		{
 			for (size_type index = 0; index < target_size; ++index)
 			{
-				if (m_target[index] != other.m_target[index])
+				if (mTarget[index] != other.mTarget[index])
 				{
 					return true;
 				}
@@ -213,30 +229,22 @@ class Signal<ResT(ArgTs...)> final
 			return false;
 		}
 
-	private:
-
-		alignas(DefaultType)SlotStorage m_target;
-		alignas(InvokerType)InvokerType mp_invoker;
-
 	};
 
 	class Connection final
 	{
 	public:
-
 		// Construct Connection
-		Connection(const SlotFunctor& slot,
-			const TrackPtr& t_ptr,
-			bool trackable) noexcept
-			: m_slot(slot),
-			m_track_ptr(t_ptr),
-			mp_next(nullptr),
-			mp_deleted(nullptr),
-			m_trackable(trackable)
+		Connection(const Slot& slot, const TrackPtr& t_ptr, bool trackable) noexcept
+			: m_slot{ slot }
+			, m_track_ptr{ t_ptr }
+			, mp_next{ nullptr }
+			, mp_deleted{ nullptr }
+			, m_trackable{ trackable }
 		{}
 
 		// Deleted copy-constructor
-		Connection(const Connection&)noexcept = delete;
+		Connection(const Connection&) noexcept = delete;
 
 		// Destroy Connection
 		~Connection() noexcept
@@ -246,13 +254,11 @@ class Signal<ResT(ArgTs...)> final
 		Connection& operator=(const Connection&)noexcept = delete;
 
 	public:
-
-		SlotFunctor	m_slot;
-		TrackPtr		m_track_ptr;
+		Slot	m_slot;
+		TrackPtr  m_track_ptr;
 		ConnectionPtr	mp_next;
 		Connection* mp_deleted;
 		const bool		m_trackable;
-
 	};
 
 	class Storage final
@@ -669,7 +675,7 @@ class Signal<ResT(ArgTs...)> final
 	// Connect new slot to the Signal
 	// May throw exception if memory allocation fails
 	// Must be called under write_access() protection
-	bool connect(const SlotFunctor & slot,
+	bool connect(const Slot & slot,
 		const TrackPtr & t_ptr,
 		bool trackable)
 	{
@@ -699,7 +705,7 @@ class Signal<ResT(ArgTs...)> final
 
 	// Disconnect slot from the Signal
 	// Must be called under write_access() protection
-	bool disconnect(const SlotFunctor & slot) noexcept
+	bool disconnect(const Slot & slot) noexcept
 	{
 		synchronize();
 
@@ -726,7 +732,7 @@ class Signal<ResT(ArgTs...)> final
 
 	// Check whether slot is connected to the Signal
 	// Must be called under read_access() protection
-	bool connected(const SlotFunctor & slot) const noexcept
+	bool connected(const Slot & slot) const noexcept
 	{
 		Connection* current = mp_first_slot.load();
 
@@ -748,7 +754,7 @@ class Signal<ResT(ArgTs...)> final
 	// Activate Signal
 	// May throw exception if some slot does
 	// Must be called under read_access() protection
-	void activate(ArgTs & ... args)
+	void activate(Args&& ... args)
 	{
 		Connection* current = mp_first_slot.load();
 
@@ -756,7 +762,7 @@ class Signal<ResT(ArgTs...)> final
 		{
 			if (!current->m_trackable)
 			{
-				current->m_slot(args...);
+				current->m_slot(std::forward<Args>(args)...);
 				current = current->mp_next.load();
 			}
 			else
@@ -765,7 +771,7 @@ class Signal<ResT(ArgTs...)> final
 
 				if (ptr)
 				{
-					current->m_slot(args...);
+					current->m_slot(std::forward<Args>(args)...);
 					current = current->mp_next.load();
 				}
 				else
@@ -812,85 +818,85 @@ public:
 
 	// Connect Signal to slot (static method / free function)
 	// May throw exception if memory allocation fails
-	bool connect(ResT(*function)(ArgTs...))
+	bool connect(ReType(*function)(Args...))
 	{
 		const auto writer{ write_access() };
-		return connect(SlotFunctor(function), TrackPtr(), false);
+		return connect(Slot(function), TrackPtr(), false);
 	}
 
 	// Connect Signal to slot (method)
 	// May throw exception if memory allocation fails
-	template<typename Class, typename Signature>
-	bool connect(Class * object, Signature method)
+	template<typename ClassType, typename FunctionPtrType>
+	bool connect(ClassType* object, FunctionPtrType method)
 	{
 		auto writer = write_access();
-		return connect(SlotFunctor(object, method), TrackPtr(), false);
+		return connect(Slot(object, method), TrackPtr(), false);
 	}
 
 	// Connect Signal to traceable slot (method)
 	// May throw exception if memory allocation fails
-	template<typename Class, typename Signature>
-	bool connect(::std::shared_ptr<Class> object, Signature method)
+	template<typename ClassType, typename FunctionPtrType>
+	bool connect(::std::shared_ptr<ClassType> object, FunctionPtrType method)
 	{
 		auto writer = write_access();
-		return connect(SlotFunctor(object.get(), method), TrackPtr(object), true);
+		return connect(Slot(object.get(), method), TrackPtr(object), true);
 	}
 
 	// Connect Signal to slot (functor)
 	// May throw exception if memory allocation fails
-	template<typename Class>
-	bool connect(Class * functor)
+	template<typename ClassType>
+	bool connect(ClassType* functor)
 	{
 		auto writer = write_access();
-		return connect(SlotFunctor(functor), TrackPtr(), false);
+		return connect(Slot(functor), TrackPtr(), false);
 	}
 
 	// Connect Signal to traceable slot (functor)
 	// May throw exception if memory allocation fails
-	template<typename Class>
-	bool connect(::std::shared_ptr<Class> functor)
+	template<typename ClassType>
+	bool connect(::std::shared_ptr<ClassType> functor)
 	{
 		auto writer = write_access();
-		return connect(SlotFunctor(functor.get()), TrackPtr(functor), true);
+		return connect(Slot(functor.get()), TrackPtr(functor), true);
 	}
 
 	// Disconnect Signal from slot (static method / free function)
-	bool disconnect(ResT(*function)(ArgTs...)) noexcept
+	bool disconnect(ReType(*function)(Args...)) noexcept
 	{
 		auto writer = write_access();
-		return disconnect(SlotFunctor(function));
+		return disconnect(Slot(function));
 	}
 
 	// Disconnect Signal from slot (method)
-	template<typename Class, typename Signature>
-	bool disconnect(Class * object, Signature method) noexcept
+	template<typename ClassType, typename FunctionPtrType>
+	bool disconnect(ClassType* object, FunctionPtrType method) noexcept
 	{
 		auto writer = write_access();
-		return disconnect(SlotFunctor(object, method));
+		return disconnect(Slot(object, method));
 	}
 
 	// Disconnect Signal from traceable slot (method)
-	template<typename Class, typename Signature>
-	bool disconnect(::std::shared_ptr<Class> object, Signature method) noexcept
+	template<typename ClassType, typename FunctionPtrType>
+	bool disconnect(::std::shared_ptr<ClassType> object, FunctionPtrType method) noexcept
 	{
 		auto writer = write_access();
-		return disconnect(SlotFunctor(object.get(), method));
+		return disconnect(Slot(object.get(), method));
 	}
 
 	// Disconnect Signal from slot (functor)
-	template<typename Class>
-	bool disconnect(Class * functor) noexcept
+	template<typename ClassType>
+	bool disconnect(ClassType* functor) noexcept
 	{
 		auto writer = write_access();
-		return disconnect(SlotFunctor(functor));
+		return disconnect(Slot(functor));
 	}
 
 	// Disconnect Signal from track-able slot (functor)
-	template<typename Class>
-	bool disconnect(::std::shared_ptr<Class> functor) noexcept
+	template<typename ClassType>
+	bool disconnect(::std::shared_ptr<ClassType> functor) noexcept
 	{
 		auto writer = write_access();
-		return disconnect(SlotFunctor(functor.get()));
+		return disconnect(Slot(functor.get()));
 	}
 
 	// Disconnect Signal from all slots
@@ -901,42 +907,42 @@ public:
 	}
 
 	// Check whether slot is connected (static method / free function)
-	bool connected(ResT(*function)(ArgTs...)) const noexcept
+	bool connected(ReType(*function)(Args...)) const noexcept
 	{
 		auto reader = read_access();
-		return connected(SlotFunctor(function));
+		return connected(Slot(function));
 	}
 
 	// Check whether slot is connected (method)
-	template<typename Class, typename Signature>
-	bool connected(Class * object, Signature method) const noexcept
+	template<typename ClassType, typename FunctionPtrType>
+	bool connected(ClassType* object, FunctionPtrType method) const noexcept
 	{
 		auto reader = read_access();
-		return connected(SlotFunctor(object, method));
+		return connected(Slot(object, method));
 	}
 
 	// Check whether traceable slot is connected (method)
-	template<typename Class, typename Signature>
-	bool connected(::std::shared_ptr<Class> object, Signature method) const noexcept
+	template<typename ClassType, typename FunctionPtrType>
+	bool connected(::std::shared_ptr<ClassType> object, FunctionPtrType method) const noexcept
 	{
 		auto reader = read_access();
-		return connected(SlotFunctor(object.get(), method));
+		return connected(Slot(object.get(), method));
 	}
 
 	// Check whether slot is connected (functor)
-	template<typename Class>
-	bool connected(Class * functor) const noexcept
+	template<typename ClassType>
+	bool connected(ClassType* functor) const noexcept
 	{
 		auto reader = read_access();
-		return connected(SlotFunctor(functor));
+		return connected(Slot(functor));
 	}
 
 	// Check whether traceable slot is connected (functor)
-	template<typename Class>
-	bool connected(::std::shared_ptr<Class> functor) const noexcept
+	template<typename ClassType>
+	bool connected(::std::shared_ptr<ClassType> functor) const noexcept
 	{
 		auto reader = read_access();
-		return connected(SlotFunctor(functor.get()));
+		return connected(Slot(functor.get()));
 	}
 
 	// Block Signal
@@ -953,18 +959,18 @@ public:
 
 	// Emit Signal
 	// May throw exception if some slot does
-	void emit(ArgTs ... args)
+	void emit(Args&&... args)
 	{
 		auto reader = read_access();
 		if (!m_blocked.load())
 		{
-			activate(args...);
+			activate(std::forward<Args>(args)...);
 		}
 	}
 
 	// Emit Signal
 	// May throw exception if some slot does
-	void operator()(ArgTs ... args)
+	void operator()(Args ... args)
 	{
 		auto reader = read_access();
 		if (!m_blocked.load())
@@ -1009,39 +1015,8 @@ private:
 
 };
 
-#endif // SignalS_T_HPP
+JEJO_END
 
-#if 0
-// Construct an object of type _Ty, passing std::shared_ptr<_Ty> and
-// args as arguments to the constructor of _Ty.
-// Allocates memory using ::operator new.
-// May throw std::bad_alloc exception if memory allocation fails.
-// _Ty's constructor must not throw.
-template<typename _Ty, typename ... ArgTs>
-::std::shared_ptr<_Ty> create_shared_object(ArgTs && ... args)
-{
-	_Ty* address = static_cast<_Ty*>(NEW_MEMORY(sizeof(_Ty)));
-	::std::shared_ptr<_Ty> sh_ptr(address,
-		[](_Ty * ptr) { ptr->~_Ty(); DELETE_MEMORY(ptr); });
-	::new (address) _Ty(sh_ptr, ::std::forward<ArgTs>(args)...);
-	return ::std::move(sh_ptr);
-}
+#endif // JEJO_SignalS_T_HPP
 
-// Construct an object of type _Ty, passing std::shared_ptr<_Ty> and
-// args as arguments to the constructor of _Ty.
-// Allocates memory using provided allocator alloc.
-// alloc must satisfy C++ Allocator concept requirements.
-// May throw std::bad_alloc exception if memory allocation fails.
-// _Ty's constructor must not throw.
-template<typename _Ty, typename _Alloc, typename ... ArgTs>
-::std::shared_ptr<_Ty> allocate_shared_object(const _Alloc & alloc, ArgTs && ... args)
-{
-	_Alloc _allocator(alloc);
-	_Ty* address = _allocator.allocate(1);
-	::std::shared_ptr<_Ty> sh_ptr(address,
-		[_allocator](_Ty * ptr) mutable
-		{ _allocator.destroy(ptr); _allocator.deallocate(ptr, 1); }, _allocator);
-	_allocator.construct(address, sh_ptr, ::std::forward<ArgTs>(args)...);
-	return ::std::move(sh_ptr);
-}
-#endif
+/*****************************************************************************/
