@@ -13,41 +13,32 @@
 #define JEJO_STORAGE_T_HPP
 
  // C++ headers
-#include <cstddef>		// std::size_t, std::nullptr_t
-#include <utility>		// std::move(), std::forward<>()
-#include <algorithm>	// std::copy(), std::find_if()
-#include <array>        // std::array<>, std::cbegin(), ::std::cend()
-#include <functional>   // std::invoke()
-#include <new>			// new()
-#include <atomic>		// std::atomic<>, std::atomic_flag
-#include <memory>		// std::shared_ptr<>, std::weak_ptr<>
-#include <thread>		// std::this_thread
+#include <utility>      // std::exchange
 
 
 // own JeJo-lib headers
-#include "SlotT.hpp"
+//#include "SlotT.hpp"
 
 namespace JeJo {
 
-	// TEMPLATE CLASS Slot
+	// TEMPLATE CLASS Storage
 	template<typename ReType, typename... Args> class Storage;
 
 	template<typename ReType, typename... Args> class Storage<ReType(Args...)> final
 	{
 	private:
-
-		Connection<ReType(Args...)>* mp_block;
-		Connection<ReType(Args...)>* mp_store;
-		size_type		m_capacity;
+		Connection<ReType(Args...)>* mBlockPtr;
+		Connection<ReType(Args...)>* mStorePtr;
+		size_type mCapacity;
 
 	private:
 		// Initialize requested memory block
-		void init(Connection<ReType(Args...)>* address) noexcept
+		void initMemoryBlock(Connection<ReType(Args...)>* address) noexcept
 		{
-			mp_store = address;
+			this->mStorePtr = address;
 			Connection<ReType(Args...)>** current = reinterpret_cast<Connection<ReType(Args...)>**>(address);
 
-			for (size_type index = 1; index < m_capacity; ++index)
+			for (size_type index = 1u; index < mCapacity; ++index)
 			{
 				(*current) = ++address;
 				current = reinterpret_cast<Connection<ReType(Args...)>**>(address);
@@ -56,121 +47,117 @@ namespace JeJo {
 			(*current) = nullptr;
 		}
 
-		// Expand memory by allocating new memory block
-		// May throw exception if memory allocation fails
-		void expand()
+		// Expand memory by allocating new memory block. This May throw exception if memory allocation fails
+		void expandMemory()
 		{
-			Connection<ReType(Args...)>* new_block = reinterpret_cast<Connection<ReType(Args...)>*>
-				(NEW_MEMORY(sizeof(Connection<ReType(Args...)>) * m_capacity +
-					sizeof(Connection<ReType(Args...)>*)));
-			Connection<ReType(Args...)>** next_block = reinterpret_cast<Connection<ReType(Args...)>**>
-				(mp_block + m_capacity);
+			Connection<ReType(Args...)>* newMemoryBlock = reinterpret_cast<Connection<ReType(Args...)>*>
+				(NEW_MEMORY(
+					sizeof(Connection<ReType(Args...)>) * mCapacity + 	sizeof(Connection<ReType(Args...)>*)
+				)
+			);
 
-			while (*next_block)
+			Connection<ReType(Args...)>** nextMemoryBlock = reinterpret_cast<Connection<ReType(Args...)>**>
+				(mBlockPtr + mCapacity);
+
+			while (*nextMemoryBlock)
 			{
-				next_block = reinterpret_cast<Connection<ReType(Args...)>**>
-					((*next_block) + m_capacity);
+				nextMemoryBlock = reinterpret_cast<Connection<ReType(Args...)>**>((*nextMemoryBlock) + mCapacity);
 			}
 
-			(*next_block) = new_block;
-			init(new_block);
-			(*reinterpret_cast<Connection<ReType(Args...)>**>
-				(new_block + m_capacity)) = nullptr;
+			(*nextMemoryBlock) = newMemoryBlock;
+
+			// initialize the memory block
+			initMemoryBlock(newMemoryBlock);
+			(*reinterpret_cast<Connection<ReType(Args...)>**>(newMemoryBlock + mCapacity)) = nullptr;
 		}
 
 		// Free all allocated memory blocks
-		void clear() noexcept
+		void clearMemory() noexcept
 		{
-			if (mp_block)
+			if (mBlockPtr)
 			{
-				Connection<ReType(Args...)>* to_delete = (*reinterpret_cast<Connection<ReType(Args...)>**>
-					(mp_block + m_capacity));
+				Connection<ReType(Args...)>* memoryToDelete = (*reinterpret_cast<Connection<ReType(Args...)>**>(mBlockPtr + mCapacity));
 
-				while (to_delete)
+				while (memoryToDelete) // while the memoryToDelete is valid
 				{
-					Connection<ReType(Args...)>* block = (*reinterpret_cast<Connection<ReType(Args...)>**>
-						(to_delete + m_capacity));
-					DELETE_MEMORY(to_delete);
-					to_delete = block;
+					Connection<ReType(Args...)>* block = (*reinterpret_cast<Connection<ReType(Args...)>**>(memoryToDelete + mCapacity));
+					DELETE_MEMORY(memoryToDelete);
+					memoryToDelete = block;
 				}
 
-				DELETE_MEMORY(mp_block);
+				DELETE_MEMORY(mBlockPtr);
 			}
 		}
 
 	public:
-
-		// Construct Storage
-		// May throw exception if memory allocation fails
+		// Construct Storage. It may throw exception if memory allocation fails
 		Storage(JeJo::size_type capacity)
-			: mp_block{ nullptr }
-			, mp_store{ nullptr }
-			, m_capacity{ capacity >= 1u ? capacity : 1u }
+			: mBlockPtr{ nullptr }
+			, mStorePtr{ nullptr }
+			, mCapacity{ capacity >= 1u ? capacity : 1u }
 		{
-			mp_block = reinterpret_cast<Connection<ReType(Args...)>*>(
+			mBlockPtr = reinterpret_cast<Connection<ReType(Args...)>*>(
 				NEW_MEMORY(
-					m_capacity * sizeof(Connection<ReType(Args...)>)
-					+ sizeof(Connection<ReType(Args...)>*)
+					mCapacity * sizeof(Connection<ReType(Args...)>) + sizeof(Connection<ReType(Args...)>*)
 				)
-				);
-			init(mp_block);
+			);
 
-			(*reinterpret_cast<Connection<ReType(Args...)>**>
-				(mp_block + m_capacity)) = nullptr;
+			// initialize the memory block
+			initMemoryBlock(mBlockPtr);
+			(*reinterpret_cast<Connection<ReType(Args...)>**>(mBlockPtr + mCapacity)) = nullptr;
 		}
+
+		// Copy-construct Storage
+		Storage(const Storage& other) noexcept = delete;
+
+		// Copy-assignment Storage
+		Storage& operator=(const Storage& other) noexcept = delete;
 
 		// Move-construct Storage
 		Storage(Storage&& other) noexcept
-			: mp_block(other.mp_block),
-			mp_store(other.mp_store),
-			m_capacity(other.m_capacity)
+			: mBlockPtr{ std::exchange(other.mBlockPtr, nullptr) }
+			, mStorePtr{ std::exchange(other.mStorePtr, nullptr) }
+			, mCapacity{ std::exchange(other.mCapacity, 0u) }
+		{}
+
+		// Move-assignment Storage
+		Storage& operator=(Storage&& other) noexcept
 		{
-			other.mp_block = nullptr;
-			other.mp_store = nullptr;
-			other.m_capacity = 0;
+			clear();
+			if (this != &other)
+			{
+				mBlockPtr = std::exchange(other.mBlockPtr, nullptr);
+				mStorePtr = std::exchange(other.mStorePtr, nullptr);
+				mCapacity = std::exchange(other.mCapacity, 0u);
+			}
+
+			return *this;
 		}
 
 		// Destroy Storage
 		~Storage() noexcept
 		{
-			clear();
+			clearMemory();
 		}
 
-		// Move-assign Storage
-		Storage& operator=(Storage&& other) noexcept
-		{
-			clear();
-
-			mp_block = other.mp_block;
-			mp_store = other.mp_store;
-			m_capacity = other.m_capacity;
-
-			other.mp_block = nullptr;
-			other.mp_store = nullptr;
-			other.m_capacity = 0;
-
-			return *this;
-		}
-
-		// Allocate memory from Storage
-		// May throw exception if memory allocation fails
+		// Allocate memory from Storage; It may throw exception if memory allocation fails
 		Connection<ReType(Args...)>* allocate()
 		{
-			if (!mp_store)
+			if (!mStorePtr)
 			{
-				expand(); // May throw
+				expandMemory(); // May throw
 			}
 
-			Connection<ReType(Args...)>* current = mp_store;
-			mp_store = (*reinterpret_cast<Connection<ReType(Args...)>**>(mp_store));
+			Connection<ReType(Args...)>* current = mStorePtr;
+			mStorePtr = (*reinterpret_cast<Connection<ReType(Args...)>**>(mStorePtr));
 			return current;
 		}
 
 		// Deallocate previously allocated memory
 		void deallocate(Connection<ReType(Args...)>* address) noexcept
 		{
-			(*reinterpret_cast<Connection<ReType(Args...)>**>(address)) = mp_store;
-			mp_store = address;
+			(*reinterpret_cast<Connection<ReType(Args...)>**>(address)) = mStorePtr;
+			mStorePtr = address;
 		}
 	};
 

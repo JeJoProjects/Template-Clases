@@ -30,7 +30,7 @@ class Signal<ResT(ArgTs...)> final
 
 	using Byte = unsigned char;
 	using size_type = unsigned short;
-	using TrackPtr = ::std::weak_ptr<void>;
+	using TrackPtr = std::weak_ptr<void>;
 
 	static const size_type null_index = ((size_type)-1);
 
@@ -65,11 +65,11 @@ class Signal<ResT(ArgTs...)> final
 		using InvokerType = ResT(*)(const Byte * const, ArgTs&...);
 
 		// Invoke target slot (static method / free function)
-		template<::std::nullptr_t, typename Signature>
+		template<std::nullptr_t, typename Signature>
 		static ResT invoke(const Byte * const data, ArgTs& ... args)
 		{
 			return
-				(*reinterpret_cast<const TargetSlot<::std::nullptr_t, Signature>*>
+				(*reinterpret_cast<const TargetSlot<std::nullptr_t, Signature>*>
 				(data)->mp_function)(args...);
 		}
 
@@ -85,11 +85,11 @@ class Signal<ResT(ArgTs...)> final
 		}
 
 		// Invoke target slot (functor)
-		template<typename Class, ::std::nullptr_t>
+		template<typename Class, std::nullptr_t>
 		static ResT invoke(const Byte * const data, ArgTs& ... args)
 		{
 			return
-				(*reinterpret_cast<const TargetSlot<Class, ::std::nullptr_t>*>
+				(*reinterpret_cast<const TargetSlot<Class, std::nullptr_t>*>
 				(data)->mp_instance)(args...);
 		}
 
@@ -101,7 +101,7 @@ class Signal<ResT(ArgTs...)> final
 		{
 			using Signature = decltype(function);
 			auto storage = reinterpret_cast<TargetSlot
-				<::std::nullptr_t, Signature>*>(&m_target[0]);
+				<std::nullptr_t, Signature>*>(&m_target[0]);
 			storage->mp_function = function;
 			storage->mp_instance = nullptr;
 			mp_invoker = &SlotFunctor::invoke<nullptr, Signature>;
@@ -125,19 +125,19 @@ class Signal<ResT(ArgTs...)> final
 			: m_target{}, mp_invoker{ nullptr }
 		{
 			auto storage = reinterpret_cast<TargetSlot
-				<Class, ::std::nullptr_t>*>(&m_target[0]);
+				<Class, std::nullptr_t>*>(&m_target[0]);
 			storage->mp_function = nullptr;
 			storage->mp_instance = functor;
 			mp_invoker = &SlotFunctor::invoke<Class, nullptr>;
 		}
 
 		// Deleted constructor (null pointer)
-		SlotFunctor(::std::nullptr_t)noexcept = delete;
+		SlotFunctor(std::nullptr_t)noexcept = delete;
 
 		// Copy-construct SlotFunctor
 		SlotFunctor(const SlotFunctor & other) noexcept
 		{
-			::std::copy(other.m_target,
+			std::copy(other.m_target,
 				other.m_target + target_size, m_target);
 			mp_invoker = other.mp_invoker;
 		}
@@ -151,7 +151,7 @@ class Signal<ResT(ArgTs...)> final
 		{
 			if (this != &other)
 			{
-				::std::copy(other.m_target,
+				std::copy(other.m_target,
 					other.m_target + target_size, m_target);
 				mp_invoker = other.mp_invoker;
 			}
@@ -481,7 +481,7 @@ public:
 	// Connect Signal to trackable slot (method)
 	// May throw exception if memory allocation fails
 	template<typename Class, typename Signature>
-	bool connect(::std::shared_ptr<Class> object, Signature method)
+	bool connect(std::shared_ptr<Class> object, Signature method)
 	{
 		return connect(SlotFunctor(object.get(), method), TrackPtr(object), true);
 	}
@@ -497,7 +497,7 @@ public:
 	// Connect Signal to trackable slot (functor)
 	// May throw exception if memory allocation fails
 	template<typename Class>
-	bool connect(::std::shared_ptr<Class> functor)
+	bool connect(std::shared_ptr<Class> functor)
 	{
 		return connect(SlotFunctor(functor.get()), TrackPtr(functor), true);
 	}
@@ -517,7 +517,7 @@ public:
 
 	// Disconnect Signal from trackable slot (method)
 	template<typename Class, typename Signature>
-	bool disconnect(::std::shared_ptr<Class> object, Signature method) noexcept
+	bool disconnect(std::shared_ptr<Class> object, Signature method) noexcept
 	{
 		return disconnect(SlotFunctor(object.get(), method));
 	}
@@ -531,7 +531,7 @@ public:
 
 	// Disconnect Signal from trackable slot (functor)
 	template<typename Class>
-	bool disconnect(::std::shared_ptr<Class> functor) noexcept
+	bool disconnect(std::shared_ptr<Class> functor) noexcept
 	{
 		return disconnect(SlotFunctor(functor.get()));
 	}
@@ -567,7 +567,7 @@ public:
 
 	// Check whether trackable slot is connected (method)
 	template<typename Class, typename Signature>
-	bool connected(::std::shared_ptr<Class> object, Signature method) const noexcept
+	bool connected(std::shared_ptr<Class> object, Signature method) const noexcept
 	{
 		return connected(SlotFunctor(object.get(), method));
 	}
@@ -581,7 +581,7 @@ public:
 
 	// Check whether trackable slot is connected (functor)
 	template<typename Class>
-	bool connected(::std::shared_ptr<Class> functor) const noexcept
+	bool connected(std::shared_ptr<Class> functor) const noexcept
 	{
 		return connected(SlotFunctor(functor.get()));
 	}

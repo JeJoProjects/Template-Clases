@@ -15,7 +15,7 @@
 #include <cstddef>		// std::size_t, std::nullptr_t
 #include <utility>		// std::move(), std::forward<>()
 #include <algorithm>	// std::copy(), std::find_if()
-#include <array>        // std::array<>, std::cbegin(), ::std::cend()
+#include <array>        // std::array<>, std::cbegin(), std::cend()
 #include <functional>   // std::invoke()
 #include <new>			// new()
 #include <atomic>		// std::atomic<>, std::atomic_flag
@@ -33,7 +33,6 @@
 // macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
 #define JEJO_END   }
-
 
 JEJO_BEGIN
 
@@ -60,12 +59,12 @@ class Signal<ReType(Args...)> final
 	class ReadGuard;
 	
 	using ConnectionType = Connection<ReType(Args...)>;
-	using ConnectionPtr = ::std::atomic<Connection<ReType(Args...)>*>;
+	using ConnectionPtr = std::atomic<Connection<ReType(Args...)>*>;
 
 
 	class SlimLock final
 	{
-		using lock_type = ::std::atomic_flag;
+		using lock_type = std::atomic_flag;
 
 	public:
 
@@ -87,23 +86,23 @@ class Signal<ReType(Args...)> final
 		// SlimLock, blocks execution until the lock is acquired.
 		void lock() noexcept
 		{
-			while (m_lock.test_and_set(::std::memory_order_acquire))
+			while (m_lock.test_and_set(std::memory_order_acquire))
 			{
-				::std::this_thread::yield();
+				std::this_thread::yield();
 			}
 		}
 
 		// Unlock SlimLock
 		void unlock() noexcept
 		{
-			m_lock.clear(::std::memory_order_release);
+			m_lock.clear(std::memory_order_release);
 		}
 
 		// Try to lock SlimLock. Returns immediately. On successful
 		// lock acquisition returns true, otherwise returns false.
 		bool try_lock() noexcept
 		{
-			return m_lock.test_and_set(::std::memory_order_acquire)
+			return m_lock.test_and_set(std::memory_order_acquire)
 				? false : true;
 		}
 
@@ -427,7 +426,7 @@ class Signal<ReType(Args...)> final
 		{
 			if (!current->mTrackable)
 			{
-				current->mSlot(::std::forward<Args>(args)...);
+				current->mSlot(std::forward<Args>(args)...);
 				current = current->mNextPtr.load();
 			}
 			else
@@ -436,7 +435,7 @@ class Signal<ReType(Args...)> final
 
 				if (ptr)
 				{
-					current->mSlot(::std::forward<Args>(args)...);
+					current->mSlot(std::forward<Args>(args)...);
 					current = current->mNextPtr.load();
 				}
 				else
@@ -501,7 +500,7 @@ public:
 	// Connect Signal to traceable slot (method)
 	// May throw exception if memory allocation fails
 	template<typename ClassType, typename FunctionPtrType>
-	bool connect(::std::shared_ptr<ClassType> object, FunctionPtrType method)
+	bool connect(std::shared_ptr<ClassType> object, FunctionPtrType method)
 	{
 		auto writer = write_access();
 		return connect(Slot<ReType(Args...)>(object.get(), method), TrackPtr(object), true);
@@ -519,7 +518,7 @@ public:
 	// Connect Signal to traceable slot (functor)
 	// May throw exception if memory allocation fails
 	template<typename ClassType>
-	bool connect(::std::shared_ptr<ClassType> functor)
+	bool connect(std::shared_ptr<ClassType> functor)
 	{
 		auto writer = write_access();
 		return connect(Slot<ReType(Args...)>(functor.get()), TrackPtr(functor), true);
@@ -542,7 +541,7 @@ public:
 
 	// Disconnect Signal from traceable slot (method)
 	template<typename ClassType, typename FunctionPtrType>
-	bool disconnect(::std::shared_ptr<ClassType> object, FunctionPtrType method) noexcept
+	bool disconnect(std::shared_ptr<ClassType> object, FunctionPtrType method) noexcept
 	{
 		auto writer = write_access();
 		return disconnect(Slot<ReType(Args...)>(object.get(), method));
@@ -558,7 +557,7 @@ public:
 
 	// Disconnect Signal from track-able slot (functor)
 	template<typename ClassType>
-	bool disconnect(::std::shared_ptr<ClassType> functor) noexcept
+	bool disconnect(std::shared_ptr<ClassType> functor) noexcept
 	{
 		auto writer = write_access();
 		return disconnect(Slot<ReType(Args...)>(functor.get()));
@@ -588,7 +587,7 @@ public:
 
 	// Check whether traceable slot is connected (method)
 	template<typename ClassType, typename FunctionPtrType>
-	bool connected(::std::shared_ptr<ClassType> object, FunctionPtrType method) const noexcept
+	bool connected(std::shared_ptr<ClassType> object, FunctionPtrType method) const noexcept
 	{
 		auto reader = read_access();
 		return connected(Slot<ReType(Args...)>(object.get(), method));
@@ -604,7 +603,7 @@ public:
 
 	// Check whether traceable slot is connected (functor)
 	template<typename ClassType>
-	bool connected(::std::shared_ptr<ClassType> functor) const noexcept
+	bool connected(std::shared_ptr<ClassType> functor) const noexcept
 	{
 		auto reader = read_access();
 		return connected(Slot<ReType(Args...)>(functor.get()));
@@ -629,7 +628,7 @@ public:
 		auto reader = read_access();
 		if (!m_blocked.load())
 		{
-			activate(::std::forward<Args>(args)...);
+			activate(std::forward<Args>(args)...);
 		}
 	}
 
@@ -669,7 +668,7 @@ public:
 private:
 
 	Storage<ReType(Args...)>	m_Storage;
-	::std::atomic<Connection<ReType(Args...)>*>			mp_first_slot;
+	std::atomic<Connection<ReType(Args...)>*>			mp_first_slot;
 	ConnectionType* mp_deleted_s1;
 	ConnectionType* mp_deleted_s2;
 	mutable CounterType	m_access_s1;
