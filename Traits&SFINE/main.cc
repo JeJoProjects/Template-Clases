@@ -6,6 +6,15 @@
 #include "Traits.hpp"
 #include "TemplateFunctions.hpp"
 
+struct A
+{
+	std::vector<int> vec() { return {}; }
+};
+
+struct B
+{
+	std::vector<double> vec() { return {}; }
+};
 
 
 int main()
@@ -23,6 +32,11 @@ int main()
 	std::cout << "\n\nclass trait test!...\n";
 	class_type<decltype(&JeJo::MyStruct::foo)> obj{};
 	ret_type<decltype(&JeJo::MyStruct::foo)> a{ obj.foo(1) };
+#endif
+
+#if 1
+	static_assert(HasVector<A>);
+	static_assert(HasVector<B>);
 #endif
 
 #if 1  // callMemsForAllObjects() test
