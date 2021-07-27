@@ -15,11 +15,8 @@
  // C++ headers
 #include <utility>      // std::exchange
 
-
-// own JeJo-lib headers
-//#include "SlotT.hpp"
-
-namespace JeJo {
+namespace JeJo::internal
+{
 
 	// TEMPLATE CLASS Storage
 	template<typename ReType, typename... Args> class Storage;
@@ -91,7 +88,7 @@ namespace JeJo {
 
 	public:
 		// Construct Storage. It may throw exception if memory allocation fails
-		Storage(JeJo::size_type capacity)
+		Storage(size_type capacity)
 			: mBlockPtr{ nullptr }
 			, mStorePtr{ nullptr }
 			, mCapacity{ capacity >= 1u ? capacity : 1u }
@@ -123,7 +120,7 @@ namespace JeJo {
 		// Move-assignment Storage
 		Storage& operator=(Storage&& other) noexcept
 		{
-			clear();
+			clearMemory();
 			if (this != &other)
 			{
 				mBlockPtr = std::exchange(other.mBlockPtr, nullptr);

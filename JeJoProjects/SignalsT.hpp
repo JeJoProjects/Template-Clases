@@ -13,22 +13,15 @@
 
  // C++ headers
 #include <cstddef>		// std::size_t, std::nullptr_t
-#include <utility>		// std::move(), std::forward<>()
-#include <algorithm>	// std::copy(), std::find_if()
-#include <array>        // std::array<>, std::cbegin(), std::cend()
-#include <functional>   // std::invoke()
+#include <utility>		// std::forward<>()
 #include <new>			// new()
-#include <atomic>		// std::atomic<>, std::atomic_flag
 #include <memory>		// std::shared_ptr<>, std::weak_ptr<>
-#include <thread>		// std::this_thread
-#include <string>
-#include <iostream>
-#include <utility>
-
-#include "SlotT.hpp"
-#include "StorageT.hpp"
 
 // own JeJo-lib headers
+#include "SlotT.hpp"
+#include "StorageT.hpp"
+#include "LockClassesT.hpp"
+
 
 // macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
@@ -36,166 +29,29 @@
 
 JEJO_BEGIN
 
+using namespace internal;
 
 // TEMPLATE CLASS Signal
-template<typename ReType, typename... Args>
-class Signal;
+template<typename ReType, typename... Args> class Signal;
 
-template<typename ReType, typename... Args>
-class Signal<ReType(Args...)> final
+template<typename ReType, typename... Args> class Signal<ReType(Args...)> final
 {
+private:
+	using Connection = Connection<ReType(Args...)>;
+	using ConnectionPtr = Connection*;
+	using AtomicConnectionPtr = std::atomic<ConnectionPtr>;
 
-	// Synchronization primitive that protects shared data from being
-	// simultaneously modified by multiple threads. Optimized for speed
-	// and occupies very little memory. Meets Lockable requirements.
-	class SlimLock;
+	Storage<ReType(Args...)>	m_Storage;
+	AtomicConnectionPtr mp_first_slot;
+	ConnectionPtr mp_deleted_s1;
+	ConnectionPtr mp_deleted_s2;
+	mutable CounterType	m_access_s1;
+	mutable CounterType	m_access_s2;
+	mutable SlimLock		m_write_lock;
+	AccessStage			m_SyncStage;
+	AtomicBoolType				m_blocked;
 
-	// ClassType AutoLock is a SlimLock ownership wrapper that provides a
-	// convenient RAII-style mechanism for automatic locking / unlocking.
-	class AutoLock;
-
-	// ClassType ReadGuard is a stage counter ownership wrapper. Provides
-	// a convenient RAII-style mechanism for automatic increm / decrem.
-	class ReadGuard;
-	
-	using ConnectionType = Connection<ReType(Args...)>;
-	using ConnectionPtr = std::atomic<Connection<ReType(Args...)>*>;
-
-
-	class SlimLock final
-	{
-		using lock_type = std::atomic_flag;
-
-	public:
-
-		// Construct SlimLock
-		SlimLock() noexcept
-		{}
-
-		// Deleted copy-constructor
-		SlimLock(const SlimLock&)noexcept = delete;
-
-		// Destroy SlimLock
-		~SlimLock() noexcept
-		{}
-
-		// Deleted copy-assignment operator
-		SlimLock& operator=(const SlimLock&)noexcept = delete;
-
-		// Lock SlimLock. If another thread has already locked this
-		// SlimLock, blocks execution until the lock is acquired.
-		void lock() noexcept
-		{
-			while (m_lock.test_and_set(std::memory_order_acquire))
-			{
-				std::this_thread::yield();
-			}
-		}
-
-		// Unlock SlimLock
-		void unlock() noexcept
-		{
-			m_lock.clear(std::memory_order_release);
-		}
-
-		// Try to lock SlimLock. Returns immediately. On successful
-		// lock acquisition returns true, otherwise returns false.
-		bool try_lock() noexcept
-		{
-			return m_lock.test_and_set(std::memory_order_acquire)
-				? false : true;
-		}
-
-	private:
-
-		lock_type m_lock = ATOMIC_FLAG_INIT;
-
-	};
-
-	class AutoLock
-	{
-	public:
-
-		// Construct AutoLock
-		explicit AutoLock(SlimLock& s_lock) noexcept
-			: mp_lock(&s_lock)
-		{
-			mp_lock->lock();
-		}
-
-		// Move-construct AutoLock
-		AutoLock(AutoLock&& other) noexcept
-			: mp_lock(other.mp_lock)
-		{
-			other.mp_lock = nullptr;
-		}
-
-		// Destroy AutoLock
-		~AutoLock() noexcept
-		{
-			if (mp_lock)
-			{
-				mp_lock->unlock();
-			}
-		}
-
-		// Move-assign AutoLock
-		AutoLock& operator=(AutoLock&& other) noexcept
-		{
-			mp_lock->unlock();
-			mp_lock = other.mp_lock;
-			other.mp_lock = nullptr;
-			return *this;
-		}
-
-	private:
-
-		SlimLock* mp_lock;
-
-	};
-
-	class ReadGuard final
-	{
-	public:
-
-		// Construct ReadGuard
-		explicit ReadGuard(CounterType& counter) noexcept
-			: mp_counter(&counter)
-		{
-			++(*mp_counter);
-		}
-
-		// Move-construct ReadGuard
-		ReadGuard(ReadGuard&& other) noexcept
-			: mp_counter(other.mp_counter)
-		{
-			other.mp_counter = nullptr;
-		}
-
-		// Destroy ReadGuard
-		~ReadGuard() noexcept
-		{
-			if (mp_counter)
-			{
-				--(*mp_counter);
-			}
-		}
-
-		// Move-assign ReadGuard
-		ReadGuard& operator=(ReadGuard&& other) noexcept
-		{
-			--(*mp_counter);
-			mp_counter = other.mp_counter;
-			other.mp_counter = nullptr;
-			return *this;
-		}
-
-	private:
-
-		CounterType* mp_counter;
-
-	};
-
+private:
 	// Access Signal's internal structure for reading
 	ReadGuard read_access() const noexcept
 	{
@@ -214,8 +70,8 @@ class Signal<ReType(Args...)> final
 	// Must be called under write_access() protection.
 	void synchronize() noexcept
 	{
-		ConnectionType** first = nullptr;
-		ConnectionType* to_delete = nullptr;
+		ConnectionPtr* first = nullptr;
+		ConnectionPtr to_delete = nullptr;
 
 		SyncStage current_stage = m_SyncStage.load();
 
@@ -250,7 +106,7 @@ class Signal<ReType(Args...)> final
 		while (to_delete)
 		{
 			(*first) = to_delete->mDeletedPtr;
-			to_delete->~ConnectionType();
+			to_delete->~Connection();
 			m_Storage.deallocate(to_delete);
 			to_delete = (*first);
 		}
@@ -260,7 +116,7 @@ class Signal<ReType(Args...)> final
 
 	// Fix pointers of removed elements to point after this element.
 	// Must be called under write_access() protection.
-	void fix_pointers(ConnectionType * node, ConnectionType * removed) noexcept
+	void fix_pointers(Connection * node, Connection * removed) noexcept
 	{
 		while (removed)
 		{
@@ -272,12 +128,12 @@ class Signal<ReType(Args...)> final
 		}
 	}
 
-	// Logically remove element from ConnectionType list.
+	// Logically remove element from Connection list.
 	// Must be called under write_access() protection.
-	void remove(ConnectionType * node) noexcept
+	void remove(Connection * node) noexcept
 	{
-		ConnectionType** previous = nullptr;
-		ConnectionType* current = nullptr;
+		ConnectionPtr* previous = nullptr;
+		ConnectionPtr current = nullptr;
 
 		switch (m_SyncStage.load())
 		{
@@ -303,11 +159,11 @@ class Signal<ReType(Args...)> final
 		(*previous) = node;
 	}
 
-	// Logically remove all elements from ConnectionType list.
+	// Logically remove all elements from Connection list.
 	// Must be called under write_access() protection.
 	void remove_all() noexcept
 	{
-		ConnectionType* to_delete = mp_first_slot.load();
+		ConnectionPtr to_delete = mp_first_slot.load();
 
 		if (to_delete)
 		{
@@ -325,13 +181,13 @@ class Signal<ReType(Args...)> final
 
 	// Delete logically removed elements regardless of synchronization.
 	// Must be called under write_access() protection.
-	void clear(ConnectionType * removed) noexcept
+	void clear(Connection * removed) noexcept
 	{
 		while (removed)
 		{
-			ConnectionType* to_delete = removed;
+			ConnectionPtr to_delete = removed;
 			removed = removed->mDeletedPtr;
-			to_delete->~ConnectionType();
+			to_delete->~Connection();
 			m_Storage.deallocate(to_delete);
 		}
 	}
@@ -345,8 +201,8 @@ class Signal<ReType(Args...)> final
 	{
 		synchronize();
 
-		ConnectionType* current = mp_first_slot.load();
-		ConnectionPtr* previous = &mp_first_slot;
+		ConnectionPtr current = mp_first_slot.load();
+		AtomicConnectionPtr* previous = &mp_first_slot;
 
 		while (current)
 		{
@@ -361,8 +217,8 @@ class Signal<ReType(Args...)> final
 			}
 		}
 
-		ConnectionType* new_Connection = m_Storage.allocate();
-		::new(new_Connection) ConnectionType(slot, t_ptr, trackable);
+		ConnectionPtr new_Connection = m_Storage.allocate();
+		::new(new_Connection) Connection(slot, t_ptr, trackable);
 		previous->store(new_Connection);
 		return true;
 	}
@@ -373,8 +229,8 @@ class Signal<ReType(Args...)> final
 	{
 		synchronize();
 
-		ConnectionType* current = mp_first_slot.load();
-		ConnectionPtr* previous = &mp_first_slot;
+		ConnectionPtr current = mp_first_slot.load();
+		AtomicConnectionPtr* previous = &mp_first_slot;
 
 		while (current)
 		{
@@ -398,7 +254,7 @@ class Signal<ReType(Args...)> final
 	// Must be called under read_access() protection
 	bool connected(const Slot<ReType(Args...)> & slot) const noexcept
 	{
-		ConnectionType* current = mp_first_slot.load();
+		ConnectionPtr current = mp_first_slot.load();
 
 		while (current)
 		{
@@ -420,7 +276,7 @@ class Signal<ReType(Args...)> final
 	// Must be called under read_access() protection
 	void activate(Args&& ... args)
 	{
-		ConnectionType* current = mp_first_slot.load();
+		ConnectionPtr current = mp_first_slot.load();
 
 		while (current)
 		{
@@ -440,7 +296,7 @@ class Signal<ReType(Args...)> final
 				}
 				else
 				{
-					ConnectionType* to_delete = current;
+					ConnectionPtr to_delete = current;
 					current = current->mNextPtr.load();
 					auto writer = write_access();
 					disconnect(to_delete->mSlot);
@@ -461,7 +317,7 @@ public:
 		, m_access_s1{ 0 }
 		, m_access_s2{ 0 }
 		, m_write_lock{}
-		, m_SyncStage{ JeJo::SyncStage::SyncStage_1 }
+		, m_SyncStage{ SyncStage::SyncStage_1 }
 		, m_blocked{ false }
 	{}
 
@@ -647,7 +503,7 @@ public:
 	size_type size() const noexcept
 	{
 		auto writer = write_access();
-		ConnectionType* current = mp_first_slot.load();
+		ConnectionPtr current = mp_first_slot.load();
 		size_type size = 0;
 
 		while (current)
@@ -664,19 +520,6 @@ public:
 	{
 		return !mp_first_slot.load();
 	}
-
-private:
-
-	Storage<ReType(Args...)>	m_Storage;
-	std::atomic<Connection<ReType(Args...)>*>			mp_first_slot;
-	ConnectionType* mp_deleted_s1;
-	ConnectionType* mp_deleted_s2;
-	mutable CounterType	m_access_s1;
-	mutable CounterType	m_access_s2;
-	mutable SlimLock		m_write_lock;
-	AccessStage			m_SyncStage;
-	AtomicBoolType				m_blocked;
-
 };
 
 JEJO_END

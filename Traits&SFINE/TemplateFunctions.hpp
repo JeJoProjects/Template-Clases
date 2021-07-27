@@ -70,7 +70,7 @@ namespace JeJo
 		{
 			(std::apply(
 				::getMemberFunction(std::forward<Tuples>(tuples)),
-				::std::tuple_cat(
+				std::tuple_cat(
 					std::make_tuple(obj), ::getArgs(std::forward<Tuples>(tuples))
 					)
 				), ...);

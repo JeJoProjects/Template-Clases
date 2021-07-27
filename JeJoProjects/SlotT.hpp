@@ -15,22 +15,19 @@
  // C++ headers
 #include <cstddef>		// std::size_t, std::nullptr_t
 #include <utility>		// std::move(), std::forward<>()
-#include <algorithm>	// std::copy(), std::find_if()
+#include <algorithm>	// std::copy()
 #include <array>        // std::array<>, std::cbegin(), std::cend()
 #include <functional>   // std::invoke()
 #include <new>			// new()
 #include <atomic>		// std::atomic<>, std::atomic_flag
-#include <memory>		// std::shared_ptr<>, std::weak_ptr<>
-#include <thread>		// std::this_thread
 
 // Macros for dynamic memory allocation
 #define NEW_MEMORY(arg) ::operator new(arg)
 #define DELETE_MEMORY(arg) ::operator delete(arg)
 
 // own JeJo-lib headers
-namespace JeJo {
-
-
+namespace JeJo::internal
+{
 	// Synchronization stage. Specifies current access stage.
 	enum class SyncStage : char { SyncStage_1 = 1, SyncStage_2 = 2 };
 
