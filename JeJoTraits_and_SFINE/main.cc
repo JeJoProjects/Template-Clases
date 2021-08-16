@@ -10,16 +10,6 @@ using namespace std::string_literals;
 #include "Traits.hpp"
 #include "TemplateFunctions.hpp"
 
-struct A
-{
-	std::vector<int> vec() { return {}; }
-};
-
-struct B
-{
-	std::vector<double> vec() { return {}; }
-};
-
 
 int main()
 {
@@ -31,12 +21,6 @@ int main()
 	std::cout << JeJo::Function(2.0f)		<< " ";
 	std::cout << JeJo::Function((2.0))	<< "\n";
 #endif 
-
-
-#if 1
-	static_assert(HasVector<A>);
-	static_assert(HasVector<B>);
-#endif
 
 #if 1  // callMemsForAllObjects() test
 	std::cout << "\n\ncallMemsForAllObjects() test!...\n";
@@ -50,5 +34,13 @@ int main()
 	// class trait test
 	const JeJo::ClassTraitTest traitsTest{ "Test: class_traits"sv };
 	traitsTest.test();
+
+	// is_specialization_of trait/ concept test
+	const JeJo::IsSpecializationOfTest isSpecOfTest{
+		"Test: is_specialization_of trait/ concept test"sv
+	};
+	isSpecOfTest.test1();
+	isSpecOfTest.test2();
+
 	return  0;
 }

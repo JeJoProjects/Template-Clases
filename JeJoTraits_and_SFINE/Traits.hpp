@@ -149,24 +149,27 @@ struct is_simple_vector<std::vector<T, Args...>> final
 };
 
 /****************************************************************************
- *
+ * Template Trait for checking the passed container(i.e first template parameter)
+ * is a specialization of the other (i.e second template parameter).
+ * 
+ * Inspired from: https://stackoverflow.com/questions/68435612#68435612
  */
-// https://stackoverflow.com/questions/68435070/
 
+#if !FLAG // C++11 version
 template<typename Type, template<typename...> class Args>
-struct is_specialization final : std::false_type {};
+struct is_specialization_of final : std::false_type {};
 
-template<template<typename...> class Type, typename... Args>
-struct is_specialization<Type<Args...>, Type> : std::true_type {};
+template<template<typename...> class Container, typename... Args>
+struct is_specialization_of<Container<Args...>, Container> : std::true_type {};
 
 // Usage:
-// is_specialization<ContainerType, std::vector>
-// is_specialization<ContainerType, std::list>::value
+// is_specialization_of<ContainerType, std::vector>::value
+// is_specialization_of<ContainerType, std::list>::value
 
-// or Variable template(since C++14) & Concepts (C++20)
-// https://stackoverflow.com/questions/68522152/
-
-#include <concepts>
+#elif FLAG // c++20 version:
+/* Using variable template(since C++14) & concepts(C++20)!
+ * Inspired from: https://stackoverflow.com/questions/68522454#68522454
+ */ 
 
 template <typename Type, template <typename...> class Container>
 inline constexpr bool is_specialization_of = false;
@@ -178,6 +181,60 @@ template <typename Type, template <typename...> class Container>
 concept Specializes = is_specialization_of<Type, Container>;
 
 template<typename Type>
-concept HasVector = requires (Type t) {
+concept HasVector = requires (Type t)
+{
     { t.vec() } -> Specializes<std::vector>;
+};
+#endif
+
+// example and test
+struct A
+{
+    std::vector<int> vec() { return {}; }
+};
+
+struct B
+{
+    std::vector<double> vec() { return {}; }
+};
+
+class IsSpecializationOfTest final
+{
+    std::string_view mStrMsg{};
+
+public:
+    explicit IsSpecializationOfTest(std::string_view&& str) noexcept
+        : mStrMsg{ std::move(str) }
+    {
+        std::cout << "\n\n" << mStrMsg << '\n';
+    }
+    template<int I = 1>
+    void test1() const noexcept
+    {
+        std::vector<std::vector<int>> vec;
+#if FLAG
+        std::cout << std::boolalpha
+            << "is_specialization_of<decltype(vec), std::vector>: "
+            << is_specialization_of<decltype(vec), std::vector> << '\n';
+        static_assert(is_specialization_of<decltype(vec), std::vector>, " is not a std::vector!");
+
+#elif !FLAG
+        std::cout << std::boolalpha
+            << "is_specialization_of<decltype(vec), std::vector>::value: "
+            << is_specialization_of<decltype(vec), std::vector>::value << '\n';
+        static_assert(is_specialization_of<decltype(vec), std::vector>::value, " is not a std::vector!");
+#endif
+    }
+
+    void test2() const noexcept
+    {
+#if FLAG
+        std::cout << std::boolalpha
+            << "HasVector<A>: " << HasVector<A> << '\n'
+            << "HasVector<B>: " << HasVector<B> << '\n';
+
+        static_assert(HasVector<A>, " does not return a std::vector!");
+        static_assert(HasVector<B>, " does not return a std::vector!");
+#endif
+    }
 };
