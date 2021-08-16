@@ -17,6 +17,7 @@
 #define JEJO_END   }
 
 // C++ headers
+#include <iostream>
 #include <vector>            // std::vector<>
 #include <limits>            // std::numeric_limits<>
 #include <algorithm>         // std::is_sorted

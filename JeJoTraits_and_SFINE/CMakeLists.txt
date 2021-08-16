@@ -1,4 +1,4 @@
-project("SFINAE")
+project("JeJoTraits_and_SFINE")
 
 file(GLOB SOURCES
    *.h

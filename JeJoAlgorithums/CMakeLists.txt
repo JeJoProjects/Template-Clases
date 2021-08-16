@@ -1,4 +1,4 @@
-project("Algorithums")
+project("JeJoAlgorithums")
 
 file(GLOB SOURCES
    *.h

@@ -1,4 +1,4 @@
- project("JeJoTemplateProjects")
+ project("JeJoTemplateClasses")
 
 file(GLOB SOURCES
     *.h

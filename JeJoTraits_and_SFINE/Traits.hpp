@@ -3,11 +3,11 @@
 #include <vector>
 
 /****************************************************************************
- * traits for finding the class type and, return type of the member function,
- * from the pointer to the member function of any arbitrary class.
+ * traits for finding the class type and, return type from the pointer to
+ * member function, of any arbitrary class.
  */
 
-// https://stackoverflow.com/questions/52317134
+// Inspired from: https://stackoverflow.com/questions/68673408/68673845#68673845
 
 template<typename Class> struct class_traits final{};
 
@@ -18,8 +18,10 @@ struct class_traits<ReType(Class::*)(Args...)> final
 	using ret_type = ReType;
 };
 
+// Helper types
 template<typename MemFunctionPtr> using  class_type = typename class_traits<MemFunctionPtr>::class_type;
 template<typename MemFunctionPtr> using  ret_type = typename class_traits<MemFunctionPtr>::ret_type;
+
 
 // example
 namespace JeJo
