@@ -1,5 +1,9 @@
 // C++ headers
 #include <iostream>
+#include <string>
+#include <string_view>
+using namespace std::literals;
+using namespace std::string_literals;
 
 // own header
 #include "SFINAE.hpp"
@@ -20,7 +24,7 @@ struct B
 int main()
 {
 	
-#if 1 // SFINAE test
+#if 1 // Traits and SFINAE test
 	std::cout << "SFINAE test!...\n";
 	std::cout << JeJo::Function(nullptr)	<< " ";
 	std::cout << JeJo::Function(2)		<< " ";
@@ -28,11 +32,6 @@ int main()
 	std::cout << JeJo::Function((2.0))	<< "\n";
 #endif 
 
-#if 1  // class trait test
-	std::cout << "\n\nclass trait test!...\n";
-	class_type<decltype(&JeJo::MyStruct::foo)> obj{};
-	ret_type<decltype(&JeJo::MyStruct::foo)> a{ obj.foo(1) };
-#endif
 
 #if 1
 	static_assert(HasVector<A>);
@@ -47,5 +46,9 @@ int main()
 		std::make_tuple(&JeJo::MyClass::printData3, "JeJo")
 		);
 #endif
+
+	// class trait test
+	const JeJo::ClassTraitTest traitsTest{ "Test: class_traits"sv };
+	traitsTest.test();
 	return  0;
 }
