@@ -242,3 +242,36 @@ public:
 #endif
     }
 };
+
+/****************************************************************************
+ * Template Trait for finding the type of the last argument in the passed
+ * a variadic template arguments. 
+ * 
+ *
+ * Inspired from: https://stackoverflow.com/questions/68808318#68808318
+ */
+
+// Note: Special case for empty pack (as last_t<> is ill-formed)
+template <typename... Args>
+using last_variadic_t = typename decltype((std::type_identity<Args>{}, ...))::type;
+
+
+// or
+
+template<typename... Args> struct last_variadic_type {};
+template<typename Type1, typename Type2, typename...Args>
+struct last_variadic_type<Type1, Type2, Args...> : public last_variadic_type<Type2, Args...>  {};
+
+template<typename T> struct last_variadic_type<T> {
+    using type = T;
+};
+
+template<typename...Args>
+using last_type_t = typename last_variadic_type<Args...>::type;
+
+
+JEJO_END
+
+#endif // JEJO_TRAITS_HPP
+
+/*****************************************************************************/
