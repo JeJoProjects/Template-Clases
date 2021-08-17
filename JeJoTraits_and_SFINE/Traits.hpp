@@ -131,15 +131,19 @@ public:
 };
 
 /****************************************************************************
- *
+ * Template Traits for checking the passed template container class is
+ * a specialization for the standard container `std::vector`.
  */
 
-// traits for checking the Type is `std::vector`
 template<typename> struct is_std_vector final : std::false_type {};
 template<typename T, typename... Args>
 struct is_std_vector<std::vector<T, Args...>> final : std::true_type {};
 
-// traits for checking the Type is `std::vector<any_plotting point types>`
+/****************************************************************************
+ * Template Trait for checking the passed template container class is
+ * a simple std::vector, which has  `std::vector<any_plotting point types>`.
+ * This must be combined with the above is_std_vector<> trait.
+ */
 template<typename> struct is_simple_vector final : std::false_type {};
 template<typename T, typename... Args>
 struct is_simple_vector<std::vector<T, Args...>> final
