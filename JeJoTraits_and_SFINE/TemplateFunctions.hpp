@@ -82,3 +82,47 @@ namespace JeJo
 /**********************************************************************************************************
  *
  */
+
+
+// iterate forward and backwards!!!!
+#include <version>
+#include <type_traits>
+#include <string>
+using namespace std::string_literals;
+
+#if __has_include(<version>) and __cpp_lib_type_identity
+
+template<typename Type>
+using conditional_const_ref = std::conditional_t<std::is_fundamental_v<Type>
+    , Type
+    , std::add_const_t<std::add_lvalue_reference_t<Type>>
+>;
+
+template<typename... Args>
+void print_args(Args&&... args)
+{
+    static constexpr auto print_helper = []<typename Type>
+        (conditional_const_ref<Type> arg) constexpr noexcept
+    {
+        std::cout << arg << '\n';
+        return std::type_identity<void>{};
+    };
+
+    static constexpr auto print = [print_helper]<typename Type>
+        (Type&& arg) constexpr noexcept
+    {
+        return print_helper.template operator()<Type> (std::forward<Type>(arg));
+    };
+
+    std::cout << "*** Backwards ***\n";
+    (print(args) = ...);
+
+    std::cout << "\n*** Forwards ***\n";
+    (print(args), ...);
+}
+#endif
+
+int main()
+{
+    print_args(1, 2.4f, 'd', "const char[15]", "string"s);
+}
