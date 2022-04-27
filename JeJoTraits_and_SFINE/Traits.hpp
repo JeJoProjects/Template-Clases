@@ -15,6 +15,8 @@
 #include <string_view>
 #include <type_traits>
 #include <concepts>
+#include <algorithm>
+
 
 // macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
@@ -89,46 +91,6 @@ template<typename MemFunctionPtr>
 using  ret_type = typename class_traits<MemFunctionPtr>::ret_type;
 #endif
 
-// example and test
-struct MyStruct final
-{
-    int memfunc1(int a)
-    {
-        std::cout << "calling int memfunc1(int a): " << a << "\n"; return a;
-    }
-
-    void memfunc2(double a) const noexcept
-    {
-        std::cout << "calling void memfunc2(double a) const noexcept: " << a << "\n";
-    }
-};
-
-class ClassTraitTest final
-{
-    std::string_view mStrMsg{};
-
-public:
-    explicit ClassTraitTest(std::string_view&& str) noexcept
-        : mStrMsg{ std::move(str) }
-    {
-        std::cout << "\n\n" << mStrMsg << '\n';
-    }
-
-    void test() const noexcept
-    {       
-#if FLAG
-        class_type<decltype(&MyStruct::memfunc1)> obj1{};
-        [[maybe_unused]] auto ret1 = obj1.memfunc1(1);
-        static_assert(std::is_same_v<int, ret_type<decltype(&MyStruct::memfunc1)>>
-            , " are not same type!");
-
-        class_type<decltype(&MyStruct::memfunc2)> obj2{};
-        obj2.memfunc2(2.22);
-        static_assert(std::is_same_v<void, ret_type<decltype(&MyStruct::memfunc2)>>
-            , " are not same type!");
-#endif
-    }
-};
 
 /****************************************************************************
  * Template Traits for checking the passed template container class is
@@ -191,58 +153,6 @@ concept HasVector = requires (Type t)
 };
 #endif
 
-// example and test
-struct A
-{
-    std::vector<int> vec() { return {}; }
-};
-
-struct B
-{
-    std::vector<double> vec() { return {}; }
-};
-
-class IsSpecializationOfTest final
-{
-    std::string_view mStrMsg{};
-
-public:
-    explicit IsSpecializationOfTest(std::string_view&& str) noexcept
-        : mStrMsg{ std::move(str) }
-    {
-        std::cout << "\n\n" << mStrMsg << '\n';
-    }
-    template<int I = 1>
-    void test1() const noexcept
-    {
-        std::vector<std::vector<int>> vec;
-#if FLAG
-        std::cout << std::boolalpha
-            << "is_specialization_of<decltype(vec), std::vector>: "
-            << is_specialization_of<decltype(vec), std::vector> << '\n';
-        static_assert(is_specialization_of<decltype(vec), std::vector>, " is not a std::vector!");
-
-#elif !FLAG
-        std::cout << std::boolalpha
-            << "is_specialization_of<decltype(vec), std::vector>::value: "
-            << is_specialization_of<decltype(vec), std::vector>::value << '\n';
-        static_assert(is_specialization_of<decltype(vec), std::vector>::value, " is not a std::vector!");
-#endif
-    }
-
-    void test2() const noexcept
-    {
-#if FLAG
-        std::cout << std::boolalpha
-            << "HasVector<A>: " << HasVector<A> << '\n'
-            << "HasVector<B>: " << HasVector<B> << '\n';
-
-        static_assert(HasVector<A>, " does not return a std::vector!");
-        static_assert(HasVector<B>, " does not return a std::vector!");
-#endif
-    }
-};
-
 /****************************************************************************
  * Template Trait for finding the type of the last argument in the passed
  * a variadic template arguments. 
@@ -270,8 +180,41 @@ template<typename...Args>
 using last_type_t = typename last_variadic_type<Args...>::type;
 
 
+/****************************************************************************
+ *
+ *
+ *
+ *
+ * Inspired from: 
+ */
+template<class T>
+struct has_member final
+{
+    template<class> static auto SortTest(...)->std::false_type;
+
+    template<class TT>
+    static auto SortTest(int) ->
+        decltype(std::declval<TT&>().sort(), std::true_type());
+
+    template<class> static auto RangeTest(...)->std::false_type;
+
+    template<class TT>
+    static auto RangeTest(int) ->
+        decltype(std::begin(std::declval<TT&>()),
+            std::end(std::declval<TT&>()),
+            std::true_type());
+
+    static constexpr bool sort_value = decltype(SortTest<T>(0))::value;
+
+    static constexpr bool range_value = decltype(RangeTest<T>(0))::value;
+};
+template<class T> inline static constexpr bool has_sort_v = has_member<T>::sort_value;
+template<class T> inline static constexpr bool has_range_v = has_member<T>::range_value;
+
+
+/*****************************************************************************/
+
 JEJO_END
 
 #endif // JEJO_TRAITS_HPP
 
-/*****************************************************************************/
