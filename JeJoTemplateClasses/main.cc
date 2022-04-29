@@ -13,6 +13,8 @@
 #include "GenericVectorT.hpp"
 #include "ForwardCountingIterator.hpp"
 
+#include "Vector1DAs2DT.hpp"
+
 void freeFunction(int arg, std::string str)
 {
 	std::cout << "Calling free function: \"Hello Signal\" - " << arg << " " << (str) << "\n";
@@ -58,7 +60,19 @@ public:
 
 int main()
 {
-#if 1 // Test : SignalsT<>
+	std::vector<int> vec{ 1, 2, 3, 4, 5, 6 };
+
+	Vector1DAs2D<int> ob{2, 3};
+	ob.assign(vec.cbegin(), vec.cend());
+
+	std::cout << ob.width() << " " << ob.height() << "\n";
+	
+	//ob.print();
+
+	// std::cout << ob[0][1];
+	print2(ob);
+
+#if 0 // Test : SignalsT<>
 	
 	TestSignal<JeJo::Signal<void(int, std::string)>> testSignalObj;
 	testSignalObj.test1();
