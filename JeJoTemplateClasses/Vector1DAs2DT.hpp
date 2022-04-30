@@ -5,6 +5,28 @@
 #include <cstddef>
 #include <iostream>
 #include <format>
+#include <functional>
+
+// macros for copy-move contrs
+#define DISABLE_COPY(Class) \
+    Class(const Class&) = delete; \
+    Class& operator=(const Class&) = delete
+
+#define DEFAULT_COPY(Class) \
+    Class(const Class&) = default; \
+    Class& operator=(const Class&) = default
+
+#define DISABLE_MOVE(Class) \
+    Class(Class&&) = delete; \
+    Class& operator=(Class&&) = delete
+
+#define DEFAULT_MOVE(Class) \
+    Class(Class&&) = default; \
+    Class& operator=(Class&&) = default
+
+// concept for class template instantiation
+template<typename Type>
+concept IsPointer = std::is_pointer_v<Type>;
 
 /*!
  * Vector1DAs2D<T> class templates defines basic functionalities for manipulating
@@ -13,7 +35,14 @@
 template<typename Type>
 class Vector1DAs2D final
 {
-    class Proxy;
+private:
+    // forward declaration(s)
+    template<IsPointer T> class Proxy;
+
+    // type aliase(s)
+    using ProxyClassPtr = Proxy<Vector1DAs2D<Type>*>;
+    using ProxyConstClassPtr = Proxy<const Vector1DAs2D<Type>*>;
+
 public:
     constexpr explicit Vector1DAs2D(std::size_t row, std::size_t col, Type val = {})
         : mColumn{ col }
@@ -34,9 +63,73 @@ public:
     constexpr auto height() const noexcept { return mVector.size() / mColumn; }
     constexpr auto row() const noexcept { return this->height(); }
 
-    /*
-     * 1D vector element manupulation via operator()().
+
+    friend std::ostream& operator<<(std::ostream& out, const Vector1DAs2D& ob)
+    {
+        for (auto i = 0u; i < ob.row(); ++i)
+        {
+            for (auto j = 0u; j < ob.col(); ++j)
+            {
+                out << std::format("[{}, {}] : {}\t", i, j, ob[i][j]);
+            }
+            out << "\n";
+        }
+        return out;
+    }
+
+    ProxyClassPtr& operator[](std::size_t row)
+    {
+        static ProxyClassPtr ob{ this };
+        ob.setRow(row);
+        return  ob;
+    }
+
+
+    const ProxyConstClassPtr& operator[](std::size_t row) const
+    {
+        static ProxyConstClassPtr ob{ this };
+        ob.setRow(row);
+        return ob;
+    }
+private:
+    /*!
+     * private internal Proxy class for providing the operator[][] for the
+     * Vector1DAs2D class.
      */
+    template<IsPointer T> class Proxy final
+    {
+    public:
+        explicit constexpr Proxy(T arrPtr) noexcept
+            : mArrayPtr{ arrPtr }
+        {}
+        // disabled the copy and move as not required!
+        DISABLE_COPY(Proxy);
+        DISABLE_MOVE(Proxy);
+
+        constexpr void setRow(std::size_t row) noexcept
+        {
+            mRow = row;
+        }
+
+        constexpr Type& operator[](std::size_t col)
+        {
+            return mArrayPtr->operator()(mRow, col);
+        }
+
+        constexpr const Type& operator[](std::size_t col) const
+        {
+            return mArrayPtr->operator()(mRow, col);
+        }
+
+    private:
+        T mArrayPtr{ nullptr };
+        std::size_t mRow{};
+    };
+
+    /*!
+     * 1D vector element manipulation via operator()().
+     */
+#if 1
     constexpr Type& operator()(std::size_t row, std::size_t col)
     {
         return mVector[(row * mColumn) + col];
@@ -46,74 +139,13 @@ public:
     {
         return mVector[(row * mColumn) + col];
     }
-
-    void print() const noexcept
+#elif 0 //  deducing "this": not yet but --> coming soon!
+    template<typename Self>
+    decltype(auto) name(this Self&& self)
     {
-        for (auto i = 0u; i < row(); ++i)
-        {
-            for (auto j = 0u; j < col(); ++j)
-            {
-                std::cout << std::format("[{}, {}] : {}\t", i, j, this->operator()(i, j));
-            }
-            std::cout << "\n";
-        }
+        return std::forward<Self>(self).mVector;
     }
-
-    friend void print2(/*const*/ Vector1DAs2D& ob) noexcept
-    {
-        for (auto i = 0u; i < ob.row(); ++i)
-        {
-            for (auto j = 0u; j < ob.col(); ++j)
-            {
-                std::cout << std::format("[{}, {}] : {}\t", i, j, ob[i][j]);
-            }
-            std::cout << "\n";
-        }
-    }
-
-    Proxy& operator[](std::size_t row)
-    {
-        static Proxy ob{ this };
-        ob.setRow(row);
-        return ob;
-    }
-
-    const Proxy& operator[](std::size_t row) const
-    {
-        static Proxy ob{ this };
-        ob.setRow(row);
-        return ob;
-    }
-
-
-private:
-
-    class Proxy final 
-    {
-    public:
-        Proxy(Vector1DAs2D<Type>* _array)
-            : _array{ _array }
-        {}
-
-        void setRow(std::size_t row) noexcept
-        {
-            mRow = row;
-        }
-
-        constexpr Type& operator[](std::size_t col)
-        {
-            return _array->operator()(mRow, col);
-        }
-
-        constexpr const Type& operator[](std::size_t col) const
-        {
-            return _array->operator()(mRow, col);
-        }
-
-    private:
-        Vector1DAs2D<Type>* _array{ nullptr};
-        std::size_t mRow{};
-    };
+#endif
 
 private:
     std::vector<Type> mVector;
@@ -121,3 +153,4 @@ private:
 };
 
 #endif // VECTOR_1D_AS_2D_T_HPP
+

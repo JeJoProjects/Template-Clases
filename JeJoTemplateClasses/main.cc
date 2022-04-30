@@ -60,17 +60,14 @@ public:
 
 int main()
 {
-	std::vector<int> vec{ 1, 2, 3, 4, 5, 6 };
+	std::vector<int> vec{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-	Vector1DAs2D<int> ob{2, 3};
+	Vector1DAs2D<int> ob{2, 5};
 	ob.assign(vec.cbegin(), vec.cend());
 
 	std::cout << ob.width() << " " << ob.height() << "\n";
-	
-	//ob.print();
 
-	// std::cout << ob[0][1];
-	print2(ob);
+	std::cout << ob;
 
 #if 0 // Test : SignalsT<>
 	
