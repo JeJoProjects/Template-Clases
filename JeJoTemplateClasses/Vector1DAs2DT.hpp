@@ -6,6 +6,7 @@
 #include <iostream>
 #include <format>
 #include <functional>
+#include <ranges>
 
 // macros for copy-move contrs
 #define DISABLE_COPY(Class) \
@@ -66,9 +67,9 @@ public:
 
     friend std::ostream& operator<<(std::ostream& out, const Vector1DAs2D& ob)
     {
-        for (auto i = 0u; i < ob.row(); ++i)
+        for (const std::size_t i : std::views::iota(0u, ob.row()))
         {
-            for (auto j = 0u; j < ob.col(); ++j)
+            for (const std::size_t j : std::views::iota(0u, ob.col()))
             {
                 out << std::format("[{}, {}] : {}\t", i, j, ob[i][j]);
             }
