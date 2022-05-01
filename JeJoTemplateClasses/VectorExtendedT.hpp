@@ -44,22 +44,18 @@ template<typename Type> class VectorExt final : public std::vector<Type>
 	using std::vector<Type>::vector;
 public:
 	// extended functionality: specialization of operator<< for template "Type".
-	template<typename U> friend std::ostream& operator<< <>(
-		std::ostream& out, const ModePair<U> &pairObjs) noexcept;
+	template<typename U> friend std::ostream& operator<<(
+		std::ostream& out, const ModePair<U> &pairObjs) noexcept
+		{
+	        if (pairObjs.second == Mode::new_line)  // '\n' case
+	        {
+	        	for (const Type& element : pairObjs.first) out << element << '\n';
+	        	return out;
+	        }
+	        for (const Type& element : pairObjs.first) out << element << " ";
+	        return out << '\n';
+		}
 };
-
-// definition of non-member function
-template<typename Type>
-std::ostream& operator<<(std::ostream& out, const ModePair<Type> &pairObjs) noexcept
-{
-	if (pairObjs.second == Mode::new_line)  // '\n' case
-	{
-		for (const Type& element : pairObjs.first) out << element << '\n';
-		return out;
-	}
-	for (const Type& element : pairObjs.first) out << element << " ";
-	return out << '\n';
-}
 
 JEJO_END
 

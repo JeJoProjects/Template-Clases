@@ -156,20 +156,19 @@ public:
 	}
 
 	// extended functionality: specialization of operator<< for template "U".
-	template<typename U> friend std::ostream& operator<< <>(
-		std::ostream& out, const Fraction<U>& f) noexcept;
-};
-
-// definition of non-member function(s)
-template<typename U>
-std::ostream& operator<<(std::ostream& out, const Fraction<U>& f) noexcept
-{
-	return f.numerator() && f.denominator() && f.denominator() != 1 ?
+	template<typename U>
+	friend std::ostream& operator<< (
+		std::ostream& out, const Fraction<U>& f) noexcept
+    {
+	    return f.numerator() && f.denominator() && f.denominator() != 1 ?
 			out << f.numerator() << '/' << f.denominator():
 		f.numerator() && f.denominator() == 1 ? out << f.numerator() :
 		f.numerator() == f.denominator() ? out << "1" :
 		f.numerator() && !f.denominator() ? out << "Infinity" : out << "0";
-}
+    }
+};
+
+
 
 JEJO_END
 

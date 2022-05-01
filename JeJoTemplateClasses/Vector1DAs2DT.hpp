@@ -4,7 +4,11 @@
 #include <vector>
 #include <cstddef>
 #include <iostream>
-#include <format>
+
+#if  defined(_MSC_VER)
+    #include <format>
+#endif
+
 #include <functional>
 #include <ranges>
 
@@ -115,7 +119,11 @@ public:
         {
             for (const std::size_t j : std::views::iota(0ull, ob.col()))
             {
+#if  defined(_MSC_VER)
                 out << std::format("[{}, {}] : {}\t", i, j, ob[i][j]);
+#elif defined(__GNUC__) || defined(__GNUG__)
+                out <<  ob[i][j] << " ";
+#endif // defined
             }
             out << "\n";
         }

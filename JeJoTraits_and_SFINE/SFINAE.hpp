@@ -29,7 +29,7 @@ namespace JeJo
 
 	// case 2: Only for integers
 	template <typename T>
-	enable_for_integral<T> Function(const T val)
+	enable_for_integral<T> Function(const T)
 	{
 		return 1;
 	}
@@ -42,7 +42,7 @@ namespace JeJo
 
 	// case 4: Other floating point family cases(Ex: 4th long double or double cases)
 	template <typename T>
-	enable_for_floating_points<T> Function(const T val)
+	enable_for_floating_points<T> Function(const T)
 	{
 		return 2;
 	}
