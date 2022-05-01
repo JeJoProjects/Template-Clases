@@ -13,6 +13,13 @@
     Class(const Class&) = delete; \
     Class& operator=(const Class&) = delete
 
+#define DISABLE_MOVE(Class) \
+    Class(Class&&) = delete; \
+    Class& operator=(Class&&) = delete
+
+#define DISABLE_COPY_MOVE(Class) \
+    DISABLE_COPY(Class); DISABLE_MOVE(Class)
+
 #define DEFAULT_COPY(Class) \
     Class(const Class&) = default; \
     Class& operator=(const Class&) = default
@@ -24,6 +31,9 @@
 #define DEFAULT_MOVE(Class) \
     Class(Class&&) = default; \
     Class& operator=(Class&&) = default
+
+#define DEFAULT_COPY_MOVE(Class) \
+    DEFAULT_COPY(Class); DEFAULT_MOVE(Class)
 
 // concept for class template instantiation
 template<typename Type>
@@ -45,11 +55,19 @@ private:
     using ProxyConstClassPtr = Proxy<const Vector1DAs2D<Type>*>;
 
 public:
+    // @TODO: types and helper types
+    using value_type = Type;
+
     constexpr explicit Vector1DAs2D(std::size_t row, std::size_t col, Type val = {})
         : mColumn{ col }
     {
         mVector.resize(row * col, val);
     }
+
+    constexpr auto begin() noexcept { return std::begin(mVector); }
+    constexpr auto end() noexcept { return std::end(mVector); }
+    constexpr auto cbegin() const noexcept { return std::cbegin(mVector); }
+    constexpr auto cend() const noexcept { return std::cend(mVector); }
 
     // other special member functions: if required!
     template<typename InputIt>
@@ -63,20 +81,6 @@ public:
 
     constexpr auto height() const noexcept { return mVector.size() / mColumn; }
     constexpr auto row() const noexcept { return this->height(); }
-
-
-    friend std::ostream& operator<<(std::ostream& out, const Vector1DAs2D& ob)
-    {
-        for (const std::size_t i : std::views::iota(0u, ob.row()))
-        {
-            for (const std::size_t j : std::views::iota(0u, ob.col()))
-            {
-                out << std::format("[{}, {}] : {}\t", i, j, ob[i][j]);
-            }
-            out << "\n";
-        }
-        return out;
-    }
 
     ProxyClassPtr& operator[](std::size_t row)
     {
@@ -92,6 +96,32 @@ public:
         ob.setRow(row);
         return ob;
     }
+
+    void print() const noexcept
+    {
+        auto idx = 0ull;
+        // Note: Not goot the "const_cast", however for fun!
+        for (const Type ele : const_cast<Vector1DAs2D<Type>&>(*this))
+        {
+            std::cout << ele << " ";
+            if (++idx % this->col() == 0)
+                std::cout << "\n";
+        }
+    }
+
+    friend std::ostream& operator<<(std::ostream& out,  Vector1DAs2D& ob)
+    {
+        for (const std::size_t i : std::views::iota(0ull, ob.row()))
+        {
+            for (const std::size_t j : std::views::iota(0ull, ob.col()))
+            {
+                out << std::format("[{}, {}] : {}\t", i, j, ob[i][j]);
+            }
+            out << "\n";
+        }
+        return out;
+    }
+
 private:
     /*!
      * private internal Proxy class for providing the operator[][] for the
@@ -103,9 +133,9 @@ private:
         explicit constexpr Proxy(T arrPtr) noexcept
             : mArrayPtr{ arrPtr }
         {}
+
         // disabled the copy and move as not required!
-        DISABLE_COPY(Proxy);
-        DISABLE_MOVE(Proxy);
+        DISABLE_COPY_MOVE(Proxy);
 
         constexpr void setRow(std::size_t row) noexcept
         {

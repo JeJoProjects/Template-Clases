@@ -68,6 +68,10 @@ int main()
 	std::cout << ob.width() << " " << ob.height() << "\n";
 
 	std::cout << ob;
+	ob[1][4] = 100;
+
+	ob.print();
+	
 
 #if 0 // Test : SignalsT<>
 	
