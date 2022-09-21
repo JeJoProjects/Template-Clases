@@ -49,7 +49,7 @@ inline constexpr void testForward(Type last) noexcept
 {
     std::once_flag flag;
 
-    for (const auto index : IotaForwardRange{ last })
+    for (const auto index : ForwardRangeIota<Type>{ 0, last })
     {
 #if FLAG
 
@@ -70,7 +70,7 @@ template<typename Type>
 inline constexpr void testReverse(Type last) noexcept
 {
     std::once_flag flag;
-    for (const auto index : IotaReverseRange{ last })
+    for (const Type index : ReverseRangeIota<Type>{ last, 0 })
     {
 #if FLAG
         std::call_once(flag, [](auto i) constexpr noexcept
@@ -84,6 +84,7 @@ inline constexpr void testReverse(Type last) noexcept
     }
     std::cout << '\n';
 }
+
 JEJO_END // namespace JeJo
 
 #endif // !TEST_FUNCTIONS_HPP

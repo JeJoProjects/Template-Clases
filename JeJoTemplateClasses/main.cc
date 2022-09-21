@@ -176,6 +176,7 @@ int main()
 	std::cout << "Range (ArraySize, 0]: "; JeJo::testReverse(std::size(vec));
 
 	JeJo::TArray<float> arr(1);
+	std::cout << "size of the TArray: " << std::size(arr) << '\n';
 	std::cout << "Range [0, ArraySize): "; JeJo::testForward(std::size(arr));
 	std::cout << "Range (ArraySize, 0]: "; JeJo::testReverse(std::size(arr));
 #endif

@@ -1,5 +1,5 @@
 /******************************************************************************
- * ForwardCountingIterator<> is a template class which
+ * CountingIterator<> is a template class which
  * 
  * 
  * 
@@ -9,8 +9,8 @@
  * @license: free to use and distribute(no further support as well)
  *****************************************************************************/
 
-#ifndef JEJO_ForwardCountingIterator_T_HPP
-#define JEJO_ForwardCountingIterator_T_HPP
+#ifndef JEJO_CountingIterator_T_HPP
+#define JEJO_CountingIterator_T_HPP
 
 // macros for name-spacing
 #define JEJO_BEGIN namespace JeJo {
@@ -30,7 +30,7 @@ JEJO_BEGIN
  * The light weight FORWARD iterator for counting the integer from the rage [0, Value)
  */
 template<typename Type>
-class ForwardCountingIterator final
+class CountingIterator final
 {
 private:
     Type mValue;
@@ -43,32 +43,34 @@ public:
     using difference_type = std::ptrdiff_t;
 
 
-    constexpr explicit ForwardCountingIterator(Type x)noexcept
+    constexpr explicit CountingIterator(Type x) noexcept
         : mValue{ x } 
     {}
-    constexpr ForwardCountingIterator(const ForwardCountingIterator&) noexcept = default;
-    constexpr ForwardCountingIterator& operator=(const ForwardCountingIterator&) noexcept = default;
-    constexpr reference operator*() const { return mValue; }
+    constexpr CountingIterator(const CountingIterator&) noexcept = default;
+    constexpr CountingIterator& operator=(const CountingIterator&) noexcept = default;
 
-    constexpr ForwardCountingIterator& operator++() noexcept
+    // for forward iteration
+    constexpr CountingIterator& operator++() noexcept
     {
         mValue++;
         return *this;
     }
 
-    ForwardCountingIterator operator++(int) noexcept
+    CountingIterator operator++(int) noexcept
     {
         const auto copy = *this;
         ++(*this);
         return copy;
     }
 
-    constexpr bool operator==(const ForwardCountingIterator& other) const noexcept
+    constexpr reference operator*() const { return mValue; }
+
+    constexpr bool operator==(const CountingIterator& other) const noexcept
     {
         return mValue == other.mValue;
     }
 
-    constexpr bool operator!=(const ForwardCountingIterator& other) const noexcept
+    constexpr bool operator!=(const CountingIterator& other) const noexcept
     {
         return mValue != other.mValue;
     }
@@ -128,23 +130,33 @@ public:
  *
  */
 template<typename Type>
-class IotaForwardRange final
+class ForwardRangeIota final
 {
-    Type mLast;
-
+    Type mBegin, mEnd;
 public:
-    constexpr explicit IotaForwardRange(const Type last) noexcept
-        : mLast{ last }
+    constexpr explicit ForwardRangeIota(const Type begin, const Type end) noexcept
+        : mBegin{ begin }
+        , mEnd { end }
     {}
 
-    constexpr ForwardCountingIterator<Type> begin() const noexcept
+    constexpr auto begin() noexcept
     {
-        return ForwardCountingIterator<Type>{ 0 };
+        return CountingIterator<Type>{ mBegin };
     }
 
-    constexpr ForwardCountingIterator<Type> end() const noexcept
+    constexpr auto cbegin() const noexcept
+    {
+        return CountingIterator<Type>{ mBegin };
+    }
+
+    constexpr auto end() noexcept
     { 
-        return ForwardCountingIterator<Type>{ mLast }; 
+        return CountingIterator<Type>{ mEnd };
+    }
+
+    constexpr auto cend() const noexcept
+    {
+        return CountingIterator<Type>{ mEnd };
     }
 };
 
@@ -152,36 +164,53 @@ public:
  *
  */
 template<typename Type>
-class IotaReverseRange final
+class ReverseRangeIota final
 {
-    Type mLast;
+    Type mBegin, mEnd;
 
-public:
-    constexpr explicit IotaReverseRange(const Type last) noexcept
-        : mLast{ last }
-    {}
-
-    constexpr ReverseCountingIterator<Type> begin() const noexcept
+    constexpr auto calc_pos() noexcept
     {
-        return ReverseCountingIterator<Type>{ 
-            ((mLast - 1 != 0) && (mLast - 1 < mLast))
-                ? mLast - 1
-                : 0
+        return ReverseCountingIterator<Type>{
+            ((mBegin - 1 != 0) && (mBegin - 1 < mBegin))
+                ? mBegin - 1
+                : mEnd
         };
     }
 
-    constexpr ReverseCountingIterator<Type> end() const noexcept
+public:
+    constexpr explicit ReverseRangeIota(const Type begin, const Type end) noexcept
+        : mBegin{ begin }
+        , mEnd{ end }
+    {}
+
+    constexpr auto begin() noexcept
+    {
+        return calc_pos();
+    }
+
+    constexpr auto cbegin() const noexcept
+    {
+        return calc_pos();
+    }
+
+    constexpr auto end() noexcept
+    {
+        return ReverseCountingIterator<Type>{ 0 };
+    }
+
+    constexpr auto cend() const noexcept
     {
         return ReverseCountingIterator<Type>{ 0 };
     }
 };
 
+#if 0
 // deduction guide for the IotaForwardRange<Type>
 template<typename Type> IotaForwardRange(Type)->IotaForwardRange<Type>;
 
 // deduction guide for the IotaReverseRange<Type>
 template<typename Type> IotaReverseRange(Type)->IotaReverseRange<Type>;
-
+#endif
 using int32 = unsigned int;
 
 
@@ -201,6 +230,6 @@ template<typename T> struct TArray : public std::vector<T>
 
 JEJO_END
 
-#endif // JEJO_ForwardCountingIterator_T_HPP
+#endif // JEJO_CountingIterator_T_HPP
 
 /*****************************************************************************/
