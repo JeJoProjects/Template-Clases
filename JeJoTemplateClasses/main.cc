@@ -15,6 +15,8 @@
 
 #include "Vector1DAs2DT.hpp"
 
+#include "TestFunctions.hpp"
+
 void freeFunction(int arg, std::string str)
 {
 	std::cout << "Calling free function: \"Hello Signal\" - " << arg << " " << (str) << "\n";
@@ -60,6 +62,7 @@ public:
 
 int main()
 {
+#if 0
 	std::vector<int> vec{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 	Vector1DAs2D<int> ob{2, 5};
@@ -71,7 +74,7 @@ int main()
 	ob[1][4] = 100;
 
 	ob.print();
-	
+#endif	
 
 #if 0 // Test : SignalsT<>
 	
@@ -164,7 +167,7 @@ int main()
 	std::cout << "Main() - mat2D Result: " << mat3D.updateMinMax({0, 40}) << "\n\n";
 #endif
 
-#if 0 // Test : Forward and reverse iterator by indexes.
+#if 1 // Test : Forward and reverse iterator by indexes.
 	std::vector<int> vec(10);
 
 	std::cout << "size of the vector: " << std::size(vec) << '\n';

@@ -117,7 +117,7 @@ public:
         return mValue == other.mValue;
     }
     
-    constexpr bool operator!=(const ReverseCountingIterator& other) const noexcept
+    constexpr bool operator!=(const ReverseCountingIterator& /* other */) const noexcept
     {
         return mValue != -1;
     }
@@ -198,50 +198,6 @@ template<typename T> struct TArray : public std::vector<T>
     }
 };
 
-// flag to activate/deactivate the code snippet
-#define FLAG 0
-
-template<typename Type>
-constexpr void testForward(Type last) noexcept
-{
-    std::once_flag flag;
-
-    for (const auto index : IotaForwardRange{ last })
-    {
-#if FLAG
-
-        std::call_once(flag, [](auto i) constexpr noexcept 
-        {
-            std::cout << "Type of ArraySize() = type of the index: " << std::boolalpha
-                << std::is_same_v<Type, decltype(i)>
-                << '\n';
-
-        }, index);
-#endif
-        std::cout << index << " ";
-    }
-    std::cout << '\n';
-}
-
-
-template<typename Type> 
-constexpr void testReverse(Type last)  noexcept
-{
-    std::once_flag flag;
-    for (const auto index : IotaReverseRange{ last })
-    {
-#if FLAG
-        std::call_once(flag, [](auto i) constexpr noexcept
-        {
-            std::cout << "Type of ArraySize() = type of the index: " << std::boolalpha
-                << std::is_same_v<Type, decltype(i)>
-                << '\n';
-        }, index);
-#endif
-        std::cout << index << " ";
-    }
-    std::cout << '\n';
-}
 
 JEJO_END
 
