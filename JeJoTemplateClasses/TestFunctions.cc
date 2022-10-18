@@ -2,7 +2,7 @@
 #include <string>
 
 #include "TestFunctions.hpp"
-#include "StaticVariantT.hpp"
+// #include "StaticVariantT.hpp"
 
 JEJO_BEGIN
 
@@ -29,8 +29,8 @@ class B: public Base<B>{};
 
 void static_variant_test()
 {
-    variant<A, B> v;
-    std::cout << sizeof(v) << " " << sizeof(A) << "\n";
+    //variant<A, B> v;
+    //std::cout << sizeof(v) << " " << sizeof(A) << "\n";
 
     //v = 2.f;
 

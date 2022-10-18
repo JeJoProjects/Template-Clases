@@ -15,6 +15,7 @@ using namespace std::string_literals;
 #define JEJO_END   }
 
 JEJO_BEGIN
+
 /******************************************************************************
  * Following helper functions can be used to call more than one member function
  * of a class type to arbitrary number of objects of a class in a loop.
@@ -77,6 +78,39 @@ void print_args(Args&&... args) noexcept
 }
 
 #endif // __has_include(<version>) and __cpp_lib_type_identity
+
+
+/************************************************************************************
+ *
+ */
+ // overall size of an multi dim - std::array!!!!
+// type traits with recursive template instantiation!
+template<typename T> struct arr_sz final {
+    inline static constexpr std::size_t size{ sizeof(T) };
+};
+
+template<typename T, std::size_t N> struct arr_sz<std::array<T, N>> final {
+    inline static constexpr std::size_t size{ N * arr_sz<T>::size };
+};
+
+// or using recursive function call
+template<typename T> struct is_std_array final : std::false_type {};
+template<typename T, std::size_t N> struct is_std_array<std::array<T, N>> final : std::true_type {};
+template<typename T> inline constexpr bool is_std_array_t = ::is_std_array<T>::value;
+
+template<typename Type, std::size_t N>
+constexpr std::size_t overall_size(const std::array<Type, N>&) noexcept
+{
+    if constexpr (JeJo::is_std_array_t<Type>) return N * overall_size(Type{});
+    return N * sizeof(Type);
+}
+
+// Usage
+// std::array<std::array<std::array<std::array<double, 2>, 3>, 6>, 100> my_array;
+// std::cout << sizeof(my_array) << '\n';
+// std::cout << overall_size(my_array) << '\n';
+// std::cout << arr_sz<decltype(my_array)>::size << '\n';
+
 
 JEJO_END // namespace JeJo
 
