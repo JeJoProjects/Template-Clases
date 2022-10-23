@@ -49,9 +49,14 @@ auto getArgs(std::tuple<Ts...> const& t) noexcept
 #if __has_include(<version>) and __cpp_lib_type_identity
 
 template<typename Type>
+// using conditional_const_ref = std::conditional_t<std::is_fundamental_v<Type>
+//     , Type
+//     , std::add_const_t<std::add_lvalue_reference_t<Type>>
+// >;
+template<typename Type>
 using conditional_const_ref = std::conditional_t<std::is_fundamental_v<Type>
     , Type
-    , std::add_lvalue_reference_t<std::add_const_t<Type>>
+    , const Type&
 >;
 
 template<typename... Args>
