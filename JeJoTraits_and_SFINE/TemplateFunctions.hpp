@@ -51,7 +51,7 @@ auto getArgs(std::tuple<Ts...> const& t) noexcept
 template<typename Type>
 using conditional_const_ref = std::conditional_t<std::is_fundamental_v<Type>
     , Type
-    , std::add_const_t<std::add_lvalue_reference_t<Type>>
+    , std::add_lvalue_reference_t<std::add_const_t<Type>>
 >;
 
 template<typename... Args>
@@ -137,8 +137,43 @@ constexpr auto stringify(const std::ranges::range auto& data
 /************************************************************************************
  *
  */
+// to find the type
+#include <string_view>
+
+template <typename T>
+constexpr auto type_name() {
+    std::string_view name, prefix, suffix;
+#ifdef __clang__
+    name = __PRETTY_FUNCTION__;
+    prefix = "auto type_name() [T = ";
+    suffix = "]";
+#elif defined(__GNUC__)
+    name = __PRETTY_FUNCTION__;
+    prefix = "constexpr auto type_name() [with T = ";
+    suffix = "]";
+#elif defined(_MSC_VER)
+    name = __FUNCSIG__;
+    prefix = "auto __cdecl type_name<";
+    suffix = ">(void)";
+#endif
+    name.remove_prefix(prefix.size());
+    name.remove_suffix(suffix.size());
+    return name;
+}
+
+// int a = 3;
+// const int& b = 4;
+// cout << type_name<decltype(a)>() << endl;
+// cout << type_name<decltype(b)>() << endl;
+// decltype(b) k = 4;
+// cout << type_name<decltype(k)>() << endl;
+
+
+/************************************************************************************
+ *
+ */
  // overall size of an multi dim - std::array!!!!
-// type traits with recursive template instantiation!
+ // type traits with recursive template instantiation!
 template<typename T> struct arr_sz final {
     inline static constexpr std::size_t size{ sizeof(T) };
 };
