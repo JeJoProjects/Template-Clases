@@ -83,6 +83,60 @@ void print_args(Args&&... args) noexcept
 /************************************************************************************
  *
  */
+// stringify ranges(i.e. std::vector like)
+
+#include <string>
+#include <type_traits>
+#include <string>
+#include <concepts>
+#include <ranges>
+using namespace std::string_literals;
+
+// concept for checking std::to_string-able types
+template<typename Type>
+concept is_stringable = requires (Type t) { {std::to_string(t) }->std::same_as<std::string>; };
+
+constexpr auto to_string(is_stringable auto&& arg) ->decltype(auto) {
+    return std::to_string(std::forward<decltype(arg)>(arg));
+}
+
+constexpr void pop_n_backs(std::string& str, std::size_t N) {
+    while(N--) str.pop_back();
+}
+
+constexpr auto stringify(const std::ranges::range auto& data
+    , const std::string& delim = { ", "s })  -> decltype(auto)
+{
+    // value type of the ranges (i.e. Sequence ranges)
+    using ValueType = std::remove_const_t<
+        std::remove_reference_t<decltype(*data.cbegin())>>;
+
+    if constexpr (is_stringable<ValueType>) {
+        std::string string{};
+        for (ValueType element : data) {
+            string += to_string(element) +  delim ;
+        }
+        pop_n_backs(string, std::size(delim));
+        return " ["s + string + "] "s;
+    }
+    else
+    {
+        std::string string;
+        for (const ValueType& innerRange : data)
+            string += stringify(innerRange);
+        return string;
+    }
+}
+
+// std::vector<int> a{ 1, 2, 3, 4, 5, 6 };
+// std::vector<std::vector<int>> b { { 1, 2 }, { 3, 4 } };
+
+// std::cout << stringify(a, ", "s) << std::endl;
+// std::cout << stringify(b) << std::endl;
+
+/************************************************************************************
+ *
+ */
  // overall size of an multi dim - std::array!!!!
 // type traits with recursive template instantiation!
 template<typename T> struct arr_sz final {
