@@ -5,27 +5,33 @@ using namespace std::string_view_literals;
 // own header
 #include "TestFunctions.hpp"
 
-using namespace JeJo;
+
 
 int main()
 {
 	
-#if 0 // Traits and SFINAE test
+#if 1 // Traits and SFINAE test
 	std::cout << "SFINAE test!...\n";
 	sfinae_test();
+#endif
 
-#elif 0 // callMemsForAllObjects() test
-	std::cout << "\n\ncallMemsForAllObjects() test!...\n";
-	callMemsForAllObjects(
-		std::make_tuple(&JeJo::MyClass::printData1, 200),
-		std::make_tuple(&JeJo::MyClass::printData2, 201, 50.55),
-		std::make_tuple(&JeJo::MyClass::printData3, "JeJo")
-		);
 
-	// iterate forward and backwards!!!!
-	print_args(1, 2.4f, 'd', "const char[15]", "string"s);
+#if 1 // callMemsForAllObjects() test
+	std::cout << "\n\nCallMemsForAllObjects() test!...\n";
+	callMemsForAllObjects_test();
 
-#elif 1
+	// iterate forward and backwards using lambda technique... print_args()
+	std::cout << "\n\nMagic print_args() Lambda test!...\n";
+	//print_args_test();
+
+
+	// Sequence container stringify() test
+	std::cout << "\n\nStringing the containers of any dimensions!...\n";
+	void stringify_test();
+
+#endif
+
+#if 0
 	// class trait test
 	const traits::ClassTraitTest traitsTest{ "Test: class_traits"sv };
 	traitsTest.test();

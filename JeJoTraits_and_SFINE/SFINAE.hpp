@@ -19,34 +19,31 @@ using enable_for_floating_points
 	= typename std::enable_if<std::is_floating_point<Type>::value, float>::type;
 
 // examples
-namespace JeJo
+// case 1: No specification of argument-> free to choose
+inline int Function(...)
 {
-	// case 1: No specification of argument-> free to choose
-	inline int Function(...)
-	{
-		return 0;
-	}
+	return 0;
+}
 
-	// case 2: Only for integers
-	template <typename T>
-	enable_for_integral<T> Function(const T)
-	{
-		return 1;
-	}
+// case 2: Only for integers
+template <typename T>
+enable_for_integral<T> Function(const T)
+{
+	return 1;
+}
 
-	// case 3: First priority than the templates version below
-	inline float Function(const float val)
-	{
-		return val; // or as follows
-	}
+// case 3: First priority than the templates version below
+inline float Function(const float val)
+{
+	return val; // or as follows
+}
 
-	// case 4: Other floating point family cases(Ex: 4th long double or double cases)
-	template <typename T>
-	enable_for_floating_points<T> Function(const T)
-	{
-		return 2;
-	}
-} // namespace JeJo
+// case 4: Other floating point family cases(Ex: 4th long double or double cases)
+template <typename T>
+enable_for_floating_points<T> Function(const T)
+{
+	return 2;
+}
 
 #endif // SFINAE_HPP
 

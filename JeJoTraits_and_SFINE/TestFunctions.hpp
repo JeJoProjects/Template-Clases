@@ -2,23 +2,22 @@
 #define TEST_FUNCTIONS_HPP
 
 #include <vector>
+#include <string>
+using namespace std::string_literals;
 
-#include "Traits.hpp"
 #include "SFINAE.hpp"
 #include "TemplateFunctions.hpp"
+// #include "Traits.hpp"
 
-// macros for name-spacing
-#define JEJO_BEGIN namespace JeJo {
-#define JEJO_END   }
 
-JEJO_BEGIN
 
 // ---------- SFINAE_HPP ---------
 void sfinae_test() noexcept;
 
 
 // ---------- TEMPLATE_FUNCTION_HPP ---------
-#pragma region template_functions 
+#pragma region template_functions
+
 struct MyClass final
 {
 private:
@@ -36,7 +35,7 @@ public:
 
 
 template<typename... Tuples>
-void callMemsForAllObjects(Tuples&&... tuples) noexcept
+constexpr void callMemsForAllObjects(Tuples&&... tuples) noexcept
 {
 	static std::vector<MyClass> objVec{ 
 		{1, 1.011, "one"s}, {2, 2.021, "two"s}, {3, 3.031, "three"s} 
@@ -52,8 +51,17 @@ void callMemsForAllObjects(Tuples&&... tuples) noexcept
 		), ...);
 	}
 }
+
+void print_args_test();
+
+void callMemsForAllObjects_test();
+
+void stringify_test();
+
+
 #pragma endregion
 
+#if 0
 // ---------- TRAITS_HPP ---------
 #pragma region traits 
 
@@ -140,8 +148,7 @@ namespace traits
 }
 #pragma endregion 
 
-JEJO_END // namespace JeJo
-
+#endif
 
 
 #endif // !TEST_FUNCTIONS_HPP
