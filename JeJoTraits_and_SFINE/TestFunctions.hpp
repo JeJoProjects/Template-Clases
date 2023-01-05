@@ -12,7 +12,13 @@ using namespace std::string_literals;
 
 
 // ---------- SFINAE_HPP ---------
-void sfinae_test() noexcept;
+inline void sfinae_test() noexcept
+{
+	std::cout << Function(nullptr) << " ";
+	std::cout << Function(2) << " ";
+	std::cout << Function(2.0f) << " ";
+	std::cout << Function((2.0)) << "\n";
+}
 
 
 // ---------- TEMPLATE_FUNCTION_HPP ---------
@@ -26,16 +32,27 @@ private:
 	std::string m_data3{ "string"s };
 
 public:
-	MyClass(int a, double d, std::string str) noexcept;
+	MyClass(int a, double d, std::string str) noexcept : m_data1{ a }
+		, m_data2{ d }
+		, m_data3{ std::move(str) }
+	{}
 
-	void printData1(int a) const noexcept;
-	void printData2(int a, double d) const noexcept;
-	void printData3(const std::string& str) const noexcept;
+	void printData1(int ) const noexcept {
+		std::cout << "call... MyClass::printData1(int a) const noexcept\n";
+	}
+
+	void printData2(int , double ) const noexcept {
+		std::cout << "call... MyClass::printData2(int a, double d) const noexcept\n";
+	}
+
+	void printData3(const std::string& ) const noexcept {
+		std::cout << "call... MyClass::printData3(const std::string& str) const noexcept;\n\n";
+	}
 };
 
 
 template<typename... Tuples>
-constexpr void callMemsForAllObjects(Tuples&&... tuples) noexcept
+constexpr inline void callMemsForAllObjects(Tuples&&... tuples) noexcept
 {
 	static std::vector<MyClass> objVec{ 
 		{1, 1.011, "one"s}, {2, 2.021, "two"s}, {3, 3.031, "three"s} 
@@ -52,11 +69,30 @@ constexpr void callMemsForAllObjects(Tuples&&... tuples) noexcept
 	}
 }
 
-void print_args_test();
+inline void callMemsForAllObjects_test()
+{
+	callMemsForAllObjects(
+		std::make_tuple(&MyClass::printData1, 200),
+		std::make_tuple(&MyClass::printData2, 201, 50.55),
+		std::make_tuple(&MyClass::printData3, "test string"s)
+	);
+}
 
-void callMemsForAllObjects_test();
 
-void stringify_test();
+inline void print_args_test()
+{
+	print_args_forward(1, 2.4f, 'd', "string"s);
+	print_args_backwards(1, 2.4f, 'd', "string"s);
+}
+
+inline void stringify_test()
+{
+	std::vector<int> a{ 1, 2, 3, 4, 5, 6 };
+	std::vector<std::vector<int>> b{ { 1, 2 }, { 3, 4 } };
+
+	std::cout << "\n\n" << stringify(a, ", "s) << '\n';
+	std::cout << stringify(b) << "\n\n";
+}
 
 
 #pragma endregion

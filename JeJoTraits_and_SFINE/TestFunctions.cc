@@ -2,66 +2,6 @@
 #include "TestFunctions.hpp"
 
 
-// ---------- SFINAE_HPP ---------
-void sfinae_test() noexcept
-{
-	std::cout << Function(nullptr) << " ";
-	std::cout << Function(2) << " ";
-	std::cout << Function(2.0f) << " ";
-	std::cout << Function((2.0)) << "\n";
-}
-
-
-// ---------- TEMPLATE_FUNCTIONS_HPP ---------
-#pragma region template_functions 
-MyClass::MyClass(int a, double d, std::string str) noexcept
-	: m_data1{ a }
-	, m_data2{ d }
-	, m_data3{ std::move(str) }
-{}
-
-void MyClass::printData1(int ) const noexcept
-{
-	std::cout << "call... MyClass::printData1(int a) const noexcept\n";
-}
-
-void MyClass::printData2(int, double) const noexcept
-{
-	std::cout << "call... MyClass::printData2(int a, double d) const noexcept\n";
-}
-
-void MyClass::printData3(const std::string&) const noexcept
-{
-	std::cout << "call... MyClass::printData3(const std::string& str) const noexcept;\n\n";
-}
-
-void callMemsForAllObjects_test()
-{
-	callMemsForAllObjects(
-		std::make_tuple(&MyClass::printData1, 200),
-		std::make_tuple(&MyClass::printData2, 201, 50.55),
-		std::make_tuple(&MyClass::printData3, "test string"s)
-	);
-}
-
-void print_args_test()
-{
-	print_args_forward(1, 2.4f, 'd',  "string"s);
-	print_args_backwards(1, 2.4f, 'd',  "string"s);
-}
-
-void stringify_test()
-{
-	std::vector<int> a{ 1, 2, 3, 4, 5, 6 };
-	std::vector<std::vector<int>> b{ { 1, 2 }, { 3, 4 } };
-
-	std::cout << "\n\n" << stringify(a, ", "s) << '\n';
-	std::cout << stringify(b) << "\n\n";
-}
-
-#pragma endregion
-
-
 #if 0
 
 // ---------- TRAITS_HPP ---------
