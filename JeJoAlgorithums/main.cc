@@ -7,7 +7,7 @@
 
 int main()
 {
-#if 0 // Test 1: count_adjacent_if
+#if 1 // Test 1: count_adjacent_if
 	std::cout << "Test 1: count_adjacent_if...\n";
 	std::vector<int> vec{ 1,1,2,4,5,5,6,6 };
 	const auto BinPred = [](const auto& lhs, const auto& rhs) { return lhs + rhs == 3 ; };
@@ -15,7 +15,7 @@ int main()
 	// std::cout << ::count_adjacent_if2(vec.cbegin(), vec.cend(), BinPred) <<'\n'; // error
 #endif
 
-#if 0 // Test 2: has_duplicates
+#if 1 // Test 2: has_duplicates
 	std::cout << "Test 2: has_duplicates...\n";
 	std::vector<char> vec0{ 'c','a','i','o','p','a' };
 	std::cout << std::boolalpha << JeJo::has_duplicates(vec0.cbegin(), vec0.cend()) << '\n';
@@ -27,7 +27,7 @@ int main()
 	std::cout << std::boolalpha << JeJo::has_duplicates(vec2.cbegin(), vec2.cend()) << '\n';
 #endif
 
-#if 0 // Test 3: min_element_range_of
+#if 1 // Test 3: min_element_range_of
 	std::vector<int> v = { 1, 3, 5, 2, 1 };
 	const auto startIndex = 1u, endIndex = 3u;
 	const int min = JeJo::min_element_range_of(v, startIndex, endIndex /*, predicate if any*/);
