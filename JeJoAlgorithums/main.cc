@@ -35,6 +35,7 @@ int main()
 #endif
 
 #if 1 // Test 4: crefPointers
+	std::cout << "\nTest 3: crefPointers...\n";
 	std::unique_ptr<int> ptrInt1 = std::make_unique<int>(1);
 	std::unique_ptr<int> ptrInt2 = std::make_unique<int>(2);
 
