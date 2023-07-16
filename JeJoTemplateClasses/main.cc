@@ -12,10 +12,14 @@
 #include "VectorExtendedT.hpp"
 #include "GenericVectorT.hpp"
 #include "ForwardCountingIterator.hpp"
+#include "CountingRangeT.hpp"
 
 #include "Vector1DAs2DT.hpp"
 
 #include "TestFunctions.hpp"
+
+
+#define EnableCountingIterator 1
 
 void freeFunction(int arg, std::string str)
 {
@@ -167,7 +171,7 @@ int main()
 	std::cout << "Main() - mat2D Result: " << mat3D.updateMinMax({0, 40}) << "\n\n";
 #endif
 
-#if 1 // Test : Forward and reverse iterator by indexes.
+#if 0 // Test : Forward and reverse iterator by indexes.
 	std::vector<int> vec(10);
 
 	std::cout << "size of the vector: " << std::size(vec) << '\n';
@@ -180,6 +184,49 @@ int main()
 	std::cout << "Range [0, ArraySize): "; JeJo::testForward(std::size(arr));
 	std::cout << "Range (ArraySize, 0]: "; JeJo::testReverse(std::size(arr));
 #endif
+
+	// Test: Counting Iterator Test
+#if EnableCountingIterator
+	std::cout << "EnableCountingIterator -------\n";
+	enum struct Colour : int {
+		No_colour = 0,
+		Red,
+		Black,
+		Blue,
+		Yellow,
+		Green,
+		Total
+	};
+
+	enum struct Bit : std::size_t {
+		Non = 0,
+		LeftShift,
+		RightShift,
+		Negate,
+		Total
+	};
+
+	for (const int colour : JeJo::makeRange<true>(Colour::No_colour, Colour::Green))
+	{
+		// do something with inalterable index in the range [Colour::Black, Colour::Green)
+		std::cout << static_cast<int>(colour) << " ";
+	}
+	std::cout << "\n";
+
+	for (const Bit index : JeJo::makeRange(Bit::LeftShift, Bit::Total))
+	{
+		// do something with inalterable index in the range [bit::LeftShift, bit::Total)
+		std::cout << static_cast<int>(index) << " ";
+	}
+	std::cout << "\n";
+
+	for (const int index : JeJo::makeRange<true>(0, 10))
+	{
+		// do something with inalterable index in the range [0, 10)
+		std::cout << index << " ";
+	}
+	std::cout << "\n";
+#endif // Counting Iterator Test
 	return 0;
 }
 

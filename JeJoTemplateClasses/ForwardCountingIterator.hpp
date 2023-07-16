@@ -12,20 +12,17 @@
 #ifndef JEJO_CountingIterator_T_HPP
 #define JEJO_CountingIterator_T_HPP
 
-// macros for name-spacing
-#define JEJO_BEGIN namespace JeJo {
-#define JEJO_END   }
-
 // C++ headers
 #include <iostream>
 #include <mutex> // std::once_flag
 
+// macros for name-spacing
+#define JEJO_BEGIN namespace JeJo {
+#define JEJO_END   }
+
 JEJO_BEGIN
 
 // Simplified and lightweight version of std::views::iota (from C++20)
-// https://stackoverflow.com/questions/63399816/
-
-
 /*!
  * The light weight FORWARD iterator for counting the integer from the rage [0, Value)
  */
