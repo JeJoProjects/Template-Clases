@@ -206,23 +206,55 @@ int main()
 		Total
 	};
 
-	for (const int colour : JeJo::makeRange<true>(Colour::No_colour, Colour::Green))
+	// Overload - 1 -----------------------------------------------------------------
+	for (const Colour colour : JeJo::makeRange(Colour::No_colour, Colour::Green))
 	{
 		// do something with inalterable index in the range [Colour::Black, Colour::Green)
 		std::cout << static_cast<int>(colour) << " ";
 	}
 	std::cout << "\n";
 
-	for (const Bit index : JeJo::makeRange(Bit::LeftShift, Bit::Total))
+
+	// Overload - 2 -----------------------------------------------------------------
+	for (const std::size_t index : JeJo::makeRange<true>(Bit::LeftShift, Bit::Total))
 	{
 		// do something with inalterable index in the range [bit::LeftShift, bit::Total)
 		std::cout << static_cast<int>(index) << " ";
 	}
 	std::cout << "\n";
 
+
+	// Overload - 3 -----------------------------------------------------------------
 	for (const int index : JeJo::makeRange<true>(0, 10))
 	{
 		// do something with inalterable index in the range [0, 10)
+		std::cout << index << " ";
+	}
+	std::cout << "\n";
+
+
+	// Overload - 4 -----------------------------------------------------------------
+	for (const Bit index : JeJo::makeRange(0u, Bit::Total))
+	{
+		std::cout << static_cast<int>(index) << " ";
+	}
+	std::cout << "\n";
+	for (const Bit index : JeJo::makeRange(Bit::Non, 4))
+	{
+		std::cout << static_cast<int>(index) << " ";
+	}
+	std::cout << "\n";
+
+
+	// Overload - 5 -----------------------------------------------------------------
+	for (const int index : JeJo::makeRange<true>(0u, Bit::Total))
+	{
+		std::cout << index << " ";
+	}
+	std::cout << "\n";
+	for (const int index : JeJo::makeRange<true>(Bit::Non, 4))
+	{
+		// do something with inalterable index in the range [bit::LeftShift, bit::Total)
 		std::cout << index << " ";
 	}
 	std::cout << "\n";
