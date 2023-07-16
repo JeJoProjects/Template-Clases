@@ -104,6 +104,71 @@ private:
     T mEnd;
 };
 
+#if  __cplusplus <= 201703L
+
+// Overload - 1 : Default Case!
+// When iterateAsIntegrals == False ---> return CountingRange<T>.
+// 
+// Overload - 2
+// When iterateAsIntegrals == False, and
+// T == Enum ---> return CountingRange<typename std::underlying_type<T>::type>.
+//
+// Overload - 3
+// When iterateAsIntegrals == True, and
+// T == Int ---> return CountingRange<T>.
+//
+// Overload - 4
+// When iterateAsIntegrals = False, and
+// T and U == int or enum ---> Iterate an an Enum!
+template<bool iterateAsIntegrals = false, typename T = int>
+inline constexpr auto makeRange(T first, T last)
+{
+    if constexpr (!iterateAsIntegrals)
+    {
+        return CountingRange<T>{ first, last };
+    }
+    else if constexpr (iterateAsIntegrals && std::is_enum_v<T>)
+    {
+        using UnderlyingType = typename std::underlying_type<T>::type;
+
+        return CountingRange<UnderlyingType>{ static_cast<UnderlyingType>(first),
+            static_cast<UnderlyingType>(last) };
+    }
+    else if constexpr (iterateAsIntegrals && std::is_integral_v<T>)
+    {
+        return makeRange(first, last);
+    }
+}
+
+// Overload - 4
+// When iterateAsIntegrals = False, and
+// T and U == int or enum ---> Iterate an an Enum!
+// 
+// Overload - 5
+// When iterateAsIntegrals = True, and
+// T and U == int or enum ---> Iterate an an Inger!
+template<bool iterateAsIntegrals = false, typename T = int, typename U = int>
+inline constexpr auto makeRange(T first, U last)
+{
+    if constexpr ((std::is_integral_v<T> || std::is_enum_v<T>)
+        && (std::is_integral_v<U> || std::is_enum_v<U>)) 
+    {
+        if constexpr (iterateAsIntegrals)
+        {
+            using ReType = std::conditional_t<std::is_enum_v<T>&& std::is_integral_v<U>, U, T>;
+            return makeRange(static_cast<ReType>(first), static_cast<ReType>(last));
+        }
+        else if constexpr (!iterateAsIntegrals)
+        {
+            using ReType = std::conditional_t<std::is_enum_v<T>&& std::is_integral_v<U>, T, U>;
+            return makeRange(static_cast<ReType>(first), static_cast<ReType>(last));
+        }
+
+    }
+}
+
+#elif __cplusplus <= 201103L
+
 // Overload - 1 : Default Case!
 // When iterateAsIntegrals == False ---> return CountingRange<T>.
 template<bool iterateAsIntegrals = false, typename T = int>
@@ -123,7 +188,7 @@ inline constexpr auto makeRange(T first, T last)
 {
     using UnderlyingType = typename std::underlying_type<T>::type;
 
-    return CountingRange<UnderlyingType>{ static_cast<UnderlyingType>(first), 
+    return CountingRange<UnderlyingType>{ static_cast<UnderlyingType>(first),
         static_cast<UnderlyingType>(last) };
 }
 
@@ -148,10 +213,10 @@ inline constexpr auto makeRange(T first, U last)
     iterateAsIntegrals == false
     && (std::is_integral_v<T> || std::is_enum_v<T>)
     && (std::is_integral_v<U> || std::is_enum_v<U>)
-    , CountingRange<std::conditional_t<std::is_enum_v<T> && std::is_integral_v<U>, T, U>>>
+    , CountingRange<std::conditional_t<std::is_enum_v<T>&& std::is_integral_v<U>, T, U>>>
 {
-    using ReType = std::conditional_t<std::is_enum_v<T> && std::is_integral_v<U>, T, U>;
-    return makeRange( static_cast<ReType>(first), static_cast<ReType>(last) );
+    using ReType = std::conditional_t<std::is_enum_v<T>&& std::is_integral_v<U>, T, U>;
+    return makeRange(static_cast<ReType>(first), static_cast<ReType>(last));
 }
 
 
@@ -166,9 +231,11 @@ inline constexpr auto makeRange(T first, U last)
     && (std::is_integral_v<U> || std::is_enum_v<U>)
     , CountingRange<std::conditional_t<std::is_enum_v<T>&& std::is_integral_v<U>, U, T>>>
 {
-    using ReType = std::conditional_t<std::is_enum_v<T>&& std::is_integral_v<U>,U, T>;
+    using ReType = std::conditional_t<std::is_enum_v<T>&& std::is_integral_v<U>, U, T>;
     return makeRange(static_cast<ReType>(first), static_cast<ReType>(last));
 }
+
+#endif 
 
 
 
